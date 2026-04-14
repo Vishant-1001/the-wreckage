@@ -54,7 +54,18 @@
     @keyframes lineGrow { to{width:100%} }
     @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
 
-    @media(max-width:640px){.hero-nav{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.stat{border-right:none;border-bottom:1px solid #1a1a1a}.stat:last-child{border-bottom:none}}
+    @media(max-width:768px){
+      .hero-nav { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr; margin-bottom: 40px; }
+      .stat { border-right: none; border-bottom: 1px solid #1a1a1a; }
+      .stat:last-child { border-bottom: none; }
+      .hero-title { font-size: 4rem; }
+    }
+    @media(max-width:480px){
+      .hero-title { font-size: 2.8rem; }
+      .hero-sub { font-size: 0.75rem; margin-bottom: 40px; }
+      .hero { padding: 60px 16px; }
+    }
   </style>
 </head>
 <body>

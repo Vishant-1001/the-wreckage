@@ -26,6 +26,7 @@ nav {
   top: 0;
   z-index: 100;
   backdrop-filter: blur(10px);
+  flex-wrap: wrap;
 }
 nav .logo {
   color: #fff;
@@ -294,10 +295,44 @@ footer {
 }
 
 /* ── RESPONSIVE ── */
+@media (max-width: 850px) {
+  nav {
+    flex-direction: column;
+    padding: 12px;
+    gap: 10px;
+    text-align: center;
+  }
+  .group-selector-wrap {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    border-top: 1px solid #1e1e1e;
+    padding-top: 10px;
+  }
+  nav .logo {
+    margin-right: 0;
+  }
+}
+
 @media (max-width: 640px) {
-  nav { padding: 12px 16px; gap: 4px; }
   nav a { font-size: 0.7rem; padding: 5px 8px; }
   main { padding: 24px 16px 60px; }
-  h1 { font-size: 1.6rem; }
+  h1 { font-size: 1.8rem; }
   .form-row, .form-row-3 { grid-template-columns: 1fr; }
+  
+  /* Grid adjustments */
+  .entries-grid, .files-grid, .graves-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal { padding: 20px; width: 95%; margin: 10px; }
+  .btn { padding: 8px 16px; font-size: 0.7rem; }
+  .group-selector-wrap { gap: 6px; }
+  .group-selector-wrap select, .btn-manage-groups { font-size: 0.65rem; padding: 4px 6px; }
+  #nav-user { font-size: 0.65rem; width: 100%; text-align: center; margin: 4px 0; }
+  .panel { padding: 16px; }
+  .hero-title { font-size: 2.5rem !important; }
 }
