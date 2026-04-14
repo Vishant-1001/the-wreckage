@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Wreckage</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { overflow-x: hidden; }
+    #particles { position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none; }
+
+    .hero {
+      position:relative;z-index:1;min-height:100vh;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;padding:40px 24px;
+    }
+    .hero-label { font-size:0.68rem;letter-spacing:0.4em;text-transform:uppercase;color:#94a3b8;margin-bottom:24px;animation:fadeUp 1s ease both; } /* Changed from #444 */
+    .hero-title { font-size:clamp(3rem,10vw,7rem);font-weight:bold;letter-spacing:0.05em;text-transform:uppercase;color:#fff;line-height:1;margin-bottom:24px;animation:fadeUp 1s ease 0.2s both; }
+    .hero-title span { display:inline-block;position:relative; }
+    .hero-title span::after { content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:#fff;animation:lineGrow 1s ease 1.2s forwards; }
+    .hero-sub { font-size:0.85rem;letter-spacing:0.2em;color:#94a3b8;margin-bottom:60px;animation:fadeUp 1s ease 0.4s both; } /* Changed from #444 */
+
+    .group-banner {
+      background:#111;border:1px solid #1e1e1e;border-radius:8px;
+      padding:12px 20px;margin-bottom:32px;
+      font-size:0.75rem;letter-spacing:0.1em;color:#cbd5e0; /* Changed from #555 */
+      animation:fadeUp 1s ease 0.5s both;
+    }
+    .group-banner strong { color:#fff; }
+
+    .hero-nav { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:700px;width:100%;animation:fadeUp 1s ease 0.6s both; }
+    .hero-card { background:#0f0f0f;border:1px solid #1e1e1e;border-radius:8px;padding:28px 20px;text-decoration:none;color:#fff;transition:all 0.3s;position:relative;overflow:hidden; }
+    .hero-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,#fff);transform:scaleX(0);transition:transform 0.3s; }
+    .hero-card:hover { border-color:#333;transform:translateY(-4px); }
+    .hero-card:hover::before { transform:scaleX(1); }
+    .hero-card .card-icon { font-size:1.8rem;margin-bottom:12px;display:block; }
+    .hero-card .card-title { font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin-bottom:6px; }
+    .hero-card .card-desc { font-size:0.75rem;color:#94a3b8;line-height:1.6; } /* Changed from #444 */
+
+    .scroll-hint { position:absolute;bottom:32px;left:50%;transform:translateX(-50%);font-size:0.65rem;letter-spacing:0.3em;color:#64748b;text-transform:uppercase;animation:pulse 2s infinite; } /* Changed from #333 */
+
+    .about { position:relative;z-index:1;max-width:600px;margin:0 auto;padding:80px 24px;text-align:center; }
+    .about-label { font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:#64748b;margin-bottom:20px; } /* Changed from #333 */
+    .about-text { font-size:0.95rem;line-height:2;color:#cbd5e0; } /* Changed from #555 */
+    .about-text strong { color:#e2e8f0;font-weight:normal; } /* Changed from #888 */
+
+    .stats { position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);max-width:600px;margin:0 auto 80px;border:1px solid #1a1a1a;border-radius:8px;overflow:hidden; }
+    .stat { padding:24px;text-align:center;border-right:1px solid #1a1a1a; }
+    .stat:last-child { border-right:none; }
+    .stat-val { font-size:1.8rem;font-weight:bold;color:#fff;display:block;margin-bottom:4px; }
+    .stat-label { font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:#64748b; } /* Changed from #333 */
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes lineGrow { to{width:100%} }
+    @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+    @media(max-width:640px){.hero-nav{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.stat{border-right:none;border-bottom:1px solid #1a1a1a}.stat:last-child{border-bottom:none}}
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<nav>
+  <a href="index.html" class="logo">The Wreckage</a>
+  <a href="archive.html">Archive</a>
+  <a href="evidence.html">Evidence</a>
+  <a href="unfinished.html">Unfinished</a>
+  <div class="group-selector-wrap">
+    <select id="group-select" onchange="switchGroup(this.value)"></select>
+    <button class="btn-manage-groups" onclick="openGroupsModal()">⚙ Groups</button>
+    <span id="nav-user" style="font-size:0.72rem;letter-spacing:0.1em;color:#94a3b8;white-space:nowrap;"></span> <!-- Changed from #444 -->
+    <button class="btn-manage-groups" onclick="logout()" style="border-color:#2a2a2a;color:#94a3b8;">↩ Logout</button> <!-- Changed from #555 -->
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-label">A documentation of everything</div>
+  <h1 class="hero-title"><span>The Wreckage</span></h1>
+  <p class="hero-sub">everything leaves something behind</p>
+  <div class="group-banner" id="group-banner">Viewing lore for <strong id="current-group-name">—</strong></div>
+  <div class="hero-nav">
+    <a class="hero-card" href="archive.html" style="--accent:#f0b429;">
+      <span class="card-icon">📁</span>
+      <div class="card-title">The Archive</div>
+      <div class="card-desc">Iconic moments. Documented forever. The mood decides the colour.</div>
+    </a>
+    <a class="hero-card" href="evidence.html" style="--accent:#4f8ef7;">
+      <span class="card-icon">🔍</span>
+      <div class="card-title">Evidence Locker</div>
+      <div class="card-desc">Upload and store proof of things too unhinged to believe.</div>
+    </a>
+    <a class="hero-card" href="unfinished.html" style="--accent:#888;">
+      <span class="card-icon">🪦</span>
+      <div class="card-title">Unfinished Plans</div>
+      <div class="card-desc">A graveyard of intentions. Things that were supposed to happen.</div>
+    </a>
+  </div>
+  <div class="scroll-hint">↓ scroll</div>
+</section>
+
+<section class="about">
+  <div class="about-label">What is this</div>
+  <p class="about-text">
+    Every group has <strong>lore</strong>. Moments that defined things. Plans that never happened.
+    Evidence of chaos nobody would believe. <strong>The Wreckage</strong> is where all of it lives.
+    Create a group. Start logging. Let nothing be forgotten.
+  </p>
+</section>
+
+<div class="stats" id="site-stats">
+  <div class="stat"><span class="stat-val" id="stat-archive">0</span><span class="stat-label">Archived</span></div>
+  <div class="stat"><span class="stat-val" id="stat-evidence">0</span><span class="stat-label">Evidence Files</span></div>
+  <div class="stat"><span class="stat-val" id="stat-unfinished">0</span><span class="stat-label">Unfinished</span></div>
+</div>
+
+<!-- GROUPS MODAL -->
+<div class="groups-modal-overlay" id="groups-modal-overlay" onclick="closeGroupsModal(event)">
+  <div class="groups-modal">
+    <h3>⚙ Manage Groups</h3>
+    <div class="group-list" id="group-list"></div>
+    <div class="group-add-row">
+      <input type="text" id="new-group-input" placeholder="New group name" onkeydown="if(event.key==='Enter')addGroup()"/>
+      <button class="btn" onclick="addGroup()">Create</button>
+    </div>
+    <div style="margin-top:16px;text-align:right;">
+      <button class="btn-ghost btn" onclick="closeGroupsModalDirect()" style="font-size:0.75rem;">Close</button>
+    </div>
+  </div>
+</div>
+
+<footer><p>The Wreckage &nbsp;·&nbsp; everything leaves something behind</p></footer>
+
+<script src="auth.js"></script>
+<script src="groups.js"></script>
+<script>
+  requireLogin();
+  // PARTICLES
+  // show username in nav
+  const __session = getSession();
+  if (__session) document.getElementById('nav-user').textContent = '👤 ' + __session.username;
+  const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');
+  let particles=[];
+  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  function createParticle(){return{x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.5,speedX:(Math.random()-0.5)*0.3,speedY:(Math.random()-0.5)*0.3,opacity:Math.random()*0.4+0.1};}
+  for(let i=0;i<80;i++)particles.push(createParticle());
+  function animateParticles(){ctx.clearRect(0,0,canvas.width,canvas.height);particles.forEach(p=>{p.x+=p.speedX;p.y+=p.speedY;if(p.x<0||p.x>canvas.width)p.speedX*=-1;if(p.y<0||p.y>canvas.height)p.speedY*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${p.opacity})`;ctx.fill();});requestAnimationFrame(animateParticles);}
+  animateParticles();
+
+  // STATS
+  function countUp(el,target){let c=0;const step=Math.max(1,Math.floor(target/30));const t=setInterval(()=>{c=Math.min(c+step,target);el.textContent=c;if(c>=target)clearInterval(t);},40);}
+
+  window.addEventListener('groupChanged', () => {
+    const gid = getCurrentGroupId();
+    const archive    = JSON.parse(localStorage.getItem('wreckage_archive_'+gid)    ||'[]');
+    const evidence   = JSON.parse(localStorage.getItem('wreckage_evidence_'+gid)   ||'[]');
+    const unfinished = JSON.parse(localStorage.getItem('wreckage_unfinished_'+gid) ||'[]');
+    countUp(document.getElementById('stat-archive'),    archive.length);
+    countUp(document.getElementById('stat-evidence'),   evidence.length);
+    countUp(document.getElementById('stat-unfinished'), unfinished.length);
+    const g = getGroups().find(x=>x.id===gid);
+    document.getElementById('current-group-name').textContent = g ? g.name : '—';
+  });
+
+  initGroups();
+</script>
+</body>
+</html>

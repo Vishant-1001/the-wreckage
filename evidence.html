@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Evidence Locker — The Wreckage</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { background:#060a0f; }
+    nav { background:rgba(6,10,15,0.97);border-bottom:1px solid #0d1a2a; }
+    nav a { color:#60a5fa; } /* Changed from #1a3a5c */
+    nav a:hover { color:#4f8ef7;background:rgba(79,142,247,0.08); }
+    nav a.active { color:#4f8ef7;border-color:#4f8ef7;background:rgba(79,142,247,0.08); }
+    .group-selector-wrap select { background:#060a0f;border-color:#0d1a2a;color:#60a5fa; } /* Changed from #1a3a5c */
+    .btn-manage-groups { border-color:#0d1a2a;color:#60a5fa; } /* Changed from #1a3a5c */
+    .btn-manage-groups:hover { border-color:#1a3a5c;color:#4f8ef7; }
+
+    .page-hero { padding:48px 0 32px;border-bottom:1px solid #0d1a2a;margin-bottom:36px; }
+    .page-hero-label { font-size:0.65rem;letter-spacing:0.35em;text-transform:uppercase;color:#60a5fa;margin-bottom:10px; } /* Changed from #1a3a5c */
+    .page-hero h1 { color:#4f8ef7;margin-bottom:8px; }
+    .page-hero p  { color:#93c5fd;font-size:0.82rem; } /* Changed from #1a3a5c */
+
+    .panel { background:#080d14;border-color:#0d1a2a; }
+    .panel-title { color:#60a5fa;border-bottom-color:#0d1a2a; } /* Changed from #1a3a5c */
+    input[type=text],input[type=date],textarea,select { background:#060a0f;border-color:#0d1a2a;color:#c0d0e0; }
+    input[type=text]:focus,input[type=date]:focus,textarea:focus,select:focus { border-color:#4f8ef7; }
+    label { color:#60a5fa; } /* Changed from #1a3a5c */
+
+    /* SIMPLE FILE INPUT */
+    input[type=file] {
+      width: 100%;
+      padding: 10px 12px;
+      background: #060a0f;
+      border: 1px solid #0d1a2a;
+      border-radius: 6px;
+      color: #4f8ef7;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.82rem;
+      cursor: pointer;
+      margin-bottom: 6px;
+    }
+    input[type=file]:focus { outline: none; border-color: #4f8ef7; }
+    input[type=file]::file-selector-button {
+      background: #0d1a2a;
+      border: 1px solid #1a3a5c;
+      border-radius: 4px;
+      color: #4f8ef7;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      cursor: pointer;
+      margin-right: 12px;
+      transition: background 0.2s;
+    }
+    input[type=file]::file-selector-button:hover { background: #1a3a5c; }
+    .file-hint { font-size:0.68rem;color:#94a3b8;letter-spacing:0.06em; } /* Changed from #0d2a4a */
+
+    /* FILE CARDS */
+    .files-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px; }
+    .file-card { background:#080d14;border:1px solid #0d1a2a;border-radius:8px;padding:20px;cursor:pointer;transition:all 0.25s;position:relative; }
+    .file-card::before { content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:#4f8ef7;border-radius:4px 0 0 4px; }
+    .file-card:hover { border-color:#1a3a5c;transform:translateY(-2px); }
+    .file-type-icon { font-size:1.8rem;margin-bottom:10px;display:block; }
+    .file-type-badge { display:inline-block;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-bottom:12px;background:rgba(79,142,247,0.1);color:#4f8ef7;border:1px solid rgba(79,142,247,0.2); }
+    .file-title { font-size:0.95rem;color:#c0d0e0;font-weight:bold;margin-bottom:6px; }
+    .file-meta  { font-size:0.72rem;color:#94a3b8;letter-spacing:0.06em;margin-bottom:8px; } /* Changed from #1a3a5c */
+    .file-desc  { font-size:0.8rem;color:#cbd5e0;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; } /* Changed from #1a3a5c */
+    .file-footer { display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #0d1a2a;font-size:0.68rem;color:#94a3b8; } /* Changed from #1a3a5c */
+
+    /* MODAL */
+    .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity 0.2s; }
+    .modal-overlay.open { opacity:1;pointer-events:all; }
+    .modal { background:#080d14;border:1px solid #1a3a5c;border-radius:10px;max-width:520px;width:100%;padding:32px;position:relative;transform:translateY(20px);transition:transform 0.2s;max-height:85vh;overflow-y:auto; }
+    .modal-overlay.open .modal { transform:translateY(0); }
+    .modal-close { position:absolute;top:16px;right:16px;background:none;border:none;color:#60a5fa;font-size:1.2rem;cursor:pointer;padding:4px 8px; } /* Changed from #1a3a5c */
+    .modal-close:hover { color:#4f8ef7; }
+    .modal-file-icon { font-size:2.5rem;margin-bottom:12px; }
+    .modal-file-type { font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:#60a5fa;margin-bottom:8px; } /* Changed from #1a3a5c */
+    .modal-title { font-size:1.3rem;color:#c0d0e0;margin-bottom:6px; }
+    .modal-meta  { font-size:0.72rem;color:#94a3b8;margin-bottom:16px; } /* Changed from #1a3a5c */
+    .modal-filename { background:#060a0f;border:1px solid #0d1a2a;border-radius:6px;padding:12px 14px;font-size:0.82rem;color:#4f8ef7;letter-spacing:0.05em;margin-bottom:16px;word-break:break-all; }
+    .modal-desc  { font-size:0.88rem;color:#cbd5e0;line-height:1.9;margin-bottom:20px; } /* Changed from #4a6a8a */
+    .modal-note  { font-size:0.75rem;color:#94a3b8;font-style:italic;padding:10px 14px;border:1px solid #0d1a2a;border-radius:6px;line-height:1.6; } /* Changed from #1a3a5c */
+    .modal-delete { margin-top:20px;padding-top:16px;border-top:1px solid #0d1a2a;text-align:right; }
+
+    .filter-btn { border-color:#0d1a2a;color:#60a5fa; } /* Changed from #1a3a5c */
+    .filter-btn:hover { border-color:#1a3a5c;color:#4f8ef7; }
+    .filter-btn.active { border-color:#4f8ef7;color:#4f8ef7;background:rgba(79,142,247,0.08); }
+
+    .empty-state { color:#64748b; } /* Changed from #1a3a5c */
+    footer { border-top-color:#0d1a2a;color:#64748b; } /* Changed from #1a3a5c */
+    .btn { background:#4f8ef7;color:#000; }
+    .btn:hover { background:#3a7ae0; }
+    .btn-ghost { background:transparent;color:#60a5fa;border-color:#0d1a2a; } /* Changed from #1a3a5c */
+    .btn-ghost:hover { border-color:#4f8ef7;color:#4f8ef7; }
+    .groups-modal { border-color:#1a3a5c; }
+    .groups-modal h3 { color:#4f8ef7; }
+    .group-item { background:#060a0f;border-color:#0d1a2a; }
+    .group-item-name { color:#4f8ef7; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">The Wreckage</a>
+  <a href="archive.html">Archive</a>
+  <a href="evidence.html" class="active">Evidence</a>
+  <a href="unfinished.html">Unfinished</a>
+  <div class="group-selector-wrap">
+    <select id="group-select" onchange="switchGroup(this.value)"></select>
+    <button class="btn-manage-groups" onclick="openGroupsModal()">⚙ Groups</button>
+    <span id="nav-user" style="font-size:0.72rem;letter-spacing:0.1em;color:#60a5fa;white-space:nowrap;"></span> <!-- Changed from #1a3a5c -->
+    <button class="btn-manage-groups" onclick="logout()" style="border-color:#0d1a2a;color:#60a5fa;">↩ Logout</button> <!-- Changed from #1a3a5c -->
+  </div>
+</nav>
+
+<main>
+  <div class="page-hero">
+    <div class="page-hero-label">Section 02</div>
+    <h1>Evidence Locker</h1>
+    <p>Log and store proof. Things too unhinged to believe without evidence.</p>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <h2 style="color:#60a5fa;">Files — <span id="group-label" style="color:#93c5fd;font-size:0.85rem;letter-spacing:0.05em;text-transform:none;"></span></h2> <!-- Changed from #1a3a5c -->
+    <button class="btn" id="toggle-form-btn" onclick="toggleForm()">+ Log Evidence</button>
+  </div>
+
+  <!-- FORM -->
+  <div class="panel" id="evidence-form" style="display:none;">
+    <div class="panel-title">New Evidence Entry</div>
+
+    <div class="form-group">
+      <label>Title *</label>
+      <input type="text" id="f-title" placeholder="What is this evidence of"/>
+      <div class="error-msg" id="err-title">Title is required.</div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date *</label>
+        <input type="date" id="f-date"/>
+        <div class="error-msg" id="err-date">Date is required.</div>
+      </div>
+      <div class="form-group">
+        <label>People Involved</label>
+        <input type="text" id="f-people" placeholder="Who's in this evidence"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="f-desc" placeholder="What does this prove. Context. Why this matters."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Attach File *</label>
+      <input type="file" id="f-file" accept="image/*,video/*,.pdf,.txt,.doc,.docx,.zip" onchange="onFileChange(this)"/>
+      <div class="file-hint">Accepted: images, PDFs, documents, videos. The filename is saved as a reference.</div>
+      <div class="error-msg" id="err-file">Please select a file.</div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button class="btn" onclick="submitFile()">Save Entry</button>
+      <button class="btn btn-ghost" onclick="toggleForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterFiles('all',this)">All</button>
+    <button class="filter-btn" onclick="filterFiles('image',this)">Images</button>
+    <button class="filter-btn" onclick="filterFiles('pdf',this)">PDFs</button>
+    <button class="filter-btn" onclick="filterFiles('doc',this)">Documents</button>
+    <button class="filter-btn" onclick="filterFiles('video',this)">Videos</button>
+    <button class="filter-btn" onclick="filterFiles('other',this)">Other</button>
+  </div>
+
+  <div class="files-grid" id="files-grid"></div>
+  <div class="empty-state" id="empty-state">
+    <div class="empty-icon">🔍</div>
+    <div>No evidence logged for this group yet.</div>
+  </div>
+</main>
+
+<!-- FILE MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div class="modal-file-icon" id="modal-icon"></div>
+    <div class="modal-file-type" id="modal-ftype"></div>
+    <div class="modal-title"    id="modal-title"></div>
+    <div class="modal-meta"     id="modal-meta"></div>
+    <div class="modal-filename" id="modal-filename"></div>
+    <div class="modal-desc"     id="modal-desc"></div>
+    <div class="modal-note">📎 This entry stores the filename as a reference. To access the actual file, locate it on your device using the filename shown above.</div>
+    <div class="modal-delete">
+      <button class="btn btn-ghost" style="font-size:0.7rem;" onclick="deleteFile()">Remove Evidence</button>
+    </div>
+  </div>
+</div>
+
+<!-- GROUPS MODAL -->
+<div class="groups-modal-overlay" id="groups-modal-overlay" onclick="closeGroupsModal(event)">
+  <div class="groups-modal">
+    <h3>⚙ Manage Groups</h3>
+    <div class="group-list" id="group-list"></div>
+    <div class="group-add-row">
+      <input type="text" id="new-group-input" placeholder="New group name" onkeydown="if(event.key==='Enter')addGroup()"/>
+      <button class="btn" onclick="addGroup()">Create</button>
+    </div>
+    <div style="margin-top:16px;text-align:right;">
+      <button class="btn-ghost btn" onclick="closeGroupsModalDirect()" style="font-size:0.75rem;">Close</button>
+    </div>
+  </div>
+</div>
+
+<footer><p>The Wreckage &nbsp;·&nbsp; Evidence Locker</p></footer>
+
+<script src="auth.js"></script>
+<script src="groups.js"></script>
+<script>
+  requireLogin();
+  const __s = getSession();
+  if (__s) document.getElementById('nav-user').textContent = '👤 ' + __s.username;
+
+  function detectType(name) {
+    const ext = name.split('.').pop().toLowerCase();
+    if (['jpg','jpeg','png','gif','webp','svg','bmp'].includes(ext)) return 'image';
+    if (['pdf'].includes(ext)) return 'pdf';
+    if (['doc','docx','txt','odt','rtf','md'].includes(ext)) return 'doc';
+    if (['mp4','mov','avi','mkv','webm'].includes(ext)) return 'video';
+    return 'other';
+  }
+  function getIcon(t) { return {image:'🖼️',pdf:'📄',doc:'📝',video:'🎬',other:'📎'}[t]||'📎'; }
+
+  const SAMPLES = [
+    {id:2001,title:"The Auto Receipt",date:"2024-08-14",people:"Arjun, Priya, Dev, Meera",desc:"Receipt showing 380 rupees for a trip that should have cost 80. Proof the detour was real.",fileName:"auto_receipt.jpg",fileType:"image"},
+    {id:2002,title:"Warden Confrontation — Priya's Birthday",date:"2024-11-03",people:"Dev, Meera, Arjun",desc:"Screenshot of group chat at 11:47pm. 47 messages in 3 minutes.",fileName:"birthday_chat_screenshot.png",fileType:"image"},
+    {id:2003,title:"Dev's Alarm Log",date:"2024-09-29",people:"Dev",desc:"Dev's phone alarm screen. 5 alarms. All dismissed. Zero interruptions logged.",fileName:"alarm_screenshot.png",fileType:"image"},
+  ];
+
+  let files = [], selectedFileName = '', selectedFileType = '', currentId = null, currentFilter = 'all';
+
+  function getKey() { return 'wreckage_evidence_' + getCurrentGroupId(); }
+
+  function loadFiles() {
+    files = JSON.parse(localStorage.getItem(getKey()) || 'null');
+    if (files === null) { files = SAMPLES; localStorage.setItem(getKey(), JSON.stringify(files)); }
+  }
+
+  function toggleForm() {
+    const form = document.getElementById('evidence-form'), btn = document.getElementById('toggle-form-btn');
+    const open = form.style.display === 'block';
+    form.style.display = open ? 'none' : 'block';
+    btn.textContent = open ? '+ Log Evidence' : '✕ Cancel';
+    if (!open) return;
+    ['f-title','f-date','f-people','f-desc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-file').value = '';
+    selectedFileName = ''; selectedFileType = '';
+    document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('visible'));
+    document.querySelectorAll('.invalid').forEach(e => e.classList.remove('invalid'));
+  }
+
+  function onFileChange(input) {
+    const file = input.files[0];
+    if (!file) { selectedFileName = ''; selectedFileType = ''; return; }
+    selectedFileName = file.name;
+    selectedFileType = detectType(file.name);
+    document.getElementById('err-file').classList.remove('visible');
+  }
+
+  function validate() {
+    document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('visible'));
+    document.querySelectorAll('.invalid').forEach(e => e.classList.remove('invalid'));
+    let v = true;
+    if (!document.getElementById('f-title').value.trim()) { document.getElementById('f-title').classList.add('invalid'); document.getElementById('err-title').classList.add('visible'); v = false; }
+    if (!document.getElementById('f-date').value)         { document.getElementById('f-date').classList.add('invalid');  document.getElementById('err-date').classList.add('visible');  v = false; }
+    if (!selectedFileName)                                 { document.getElementById('err-file').classList.add('visible'); v = false; }
+    return v;
+  }
+
+  function submitFile() {
+    if (!validate()) return;
+    const entry = { id:Date.now(), title:document.getElementById('f-title').value.trim(), date:document.getElementById('f-date').value, people:document.getElementById('f-people').value.trim(), desc:document.getElementById('f-desc').value.trim(), fileName:selectedFileName, fileType:selectedFileType };
+    files.unshift(entry);
+    localStorage.setItem(getKey(), JSON.stringify(files));
+    toggleForm(); renderFiles();
+  }
+
+  function renderFiles() {
+    const grid = document.getElementById('files-grid'), empty = document.getElementById('empty-state');
+    const filtered = currentFilter === 'all' ? files : files.filter(f => f.fileType === currentFilter);
+    grid.innerHTML = ''; empty.style.display = filtered.length ? 'none' : 'block';
+    filtered.forEach(f => {
+      const card = document.createElement('div');
+      card.className = 'file-card'; card.onclick = () => openModal(f.id);
+      card.innerHTML = `<span class="file-type-icon">${getIcon(f.fileType)}</span><div class="file-type-badge">${f.fileType}</div><div class="file-title">${f.title}</div><div class="file-meta">${formatDate(f.date)}${f.people?' · '+f.people:''}</div>${f.desc?`<div class="file-desc">${f.desc}</div>`:''}<div class="file-footer"><span>${f.fileName}</span></div>`;
+      grid.appendChild(card);
+    });
+  }
+
+  function filterFiles(type, btn) {
+    currentFilter = type;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); renderFiles();
+  }
+
+  function openModal(id) {
+    const f = files.find(x => x.id === id); if (!f) return; currentId = id;
+    document.getElementById('modal-icon').textContent     = getIcon(f.fileType);
+    document.getElementById('modal-ftype').textContent    = f.fileType.toUpperCase();
+    document.getElementById('modal-title').textContent    = f.title;
+    document.getElementById('modal-meta').textContent     = formatDate(f.date) + (f.people ? ' · ' + f.people : '');
+    document.getElementById('modal-filename').textContent = '📎 ' + f.fileName;
+    document.getElementById('modal-desc').textContent     = f.desc || 'No description provided.';
+    document.getElementById('modal-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(e) { if (e.target === document.getElementById('modal-overlay')) closeModalDirect(); }
+  function closeModalDirect() { document.getElementById('modal-overlay').classList.remove('open'); document.body.style.overflow = ''; currentId = null; }
+
+  function deleteFile() {
+    if (!currentId || !confirm('Remove this evidence entry?')) return;
+    files = files.filter(f => f.id !== currentId);
+    localStorage.setItem(getKey(), JSON.stringify(files));
+    closeModalDirect(); renderFiles();
+  }
+
+  function formatDate(d) { if (!d) return '—'; return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
+
+  window.addEventListener('groupChanged', () => {
+    const g = getGroups().find(x => x.id === getCurrentGroupId());
+    document.getElementById('group-label').textContent = g ? g.name : '';
+    loadFiles(); renderFiles();
+  });
+
+  initGroups();
+</script>
+</body>
+</html>

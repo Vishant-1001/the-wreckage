@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unfinished Plans — The Wreckage</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { background:#080808; }
+    nav { background:rgba(8,8,8,0.97);border-bottom:1px solid #151515; }
+    nav a { color:#64748b; } /* Changed from #333 */
+    nav a:hover { color:#888;background:rgba(255,255,255,0.04); }
+    nav a.active { color:#aaa;border-color:#444;background:rgba(255,255,255,0.04); }
+    .group-selector-wrap select { background:#080808;border-color:#151515;color:#64748b; } /* Changed from #333 */
+    .btn-manage-groups { border-color:#151515;color:#64748b; } /* Changed from #2a2a2a */
+    .btn-manage-groups:hover { border-color:#333;color:#666; }
+
+    .page-hero { padding:48px 0 32px;border-bottom:1px solid #151515;margin-bottom:36px; }
+    .page-hero-label { font-size:0.65rem;letter-spacing:0.35em;text-transform:uppercase;color:#64748b;margin-bottom:10px; } /* Changed from #2a2a2a */
+    .page-hero h1 { color:#888;margin-bottom:8px; }
+    .page-hero p  { color:#94a3b8;font-size:0.82rem; } /* Changed from #2a2a2a */
+
+    .panel { background:#0a0a0a;border-color:#151515; }
+    .panel-title { color:#64748b;border-bottom-color:#111; } /* Changed from #333 */
+    input,textarea,select { background:#080808;border-color:#151515;color:#999; }
+    input:focus,textarea:focus,select:focus { border-color:#555; }
+    label { color:#64748b; } /* Changed from #333 */
+
+    .cod-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:8px; }
+    .cod-option { display:none; }
+    .cod-option+label { display:flex;align-items:center;justify-content:center;padding:10px 8px;border:1px solid #151515;border-radius:6px;cursor:pointer;font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;transition:all 0.2s;text-align:center;line-height:1.4; } /* Changed from #333 */
+    .cod-option:checked+label { border-color:#555;color:#888;background:#111; }
+
+    .graves-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px; }
+
+    .grave-card { background:#0a0a0a;border:1px solid #151515;border-radius:8px 8px 4px 4px;padding:24px 20px;cursor:pointer;transition:all 0.3s;position:relative;text-align:center; }
+    .grave-card::before { content:'';position:absolute;top:-1px;left:-1px;right:-1px;height:40%;border-radius:8px 8px 0 0;border:1px solid #1a1a1a;border-bottom:none;pointer-events:none; }
+    .grave-card:hover { border-color:#2a2a2a;transform:translateY(-3px);background:#0c0c0c; }
+
+    .grave-rip { font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:#64748b;margin-bottom:10px; } /* Changed from #2a2a2a */
+    .grave-title { font-size:1rem;color:#777;font-weight:bold;margin-bottom:8px;letter-spacing:0.05em; }
+    .grave-dates { font-size:0.7rem;color:#64748b;letter-spacing:0.1em;margin-bottom:12px; } /* Changed from #2a2a2a */
+    .grave-cod { font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:#64748b;padding:4px 10px;border:1px solid #1a1a1a;border-radius:20px;display:inline-block;margin-bottom:12px; } /* Changed from #333 */
+    .grave-eulogy { font-size:0.78rem;color:#cbd5e0;line-height:1.6;font-style:italic;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; } /* Changed from #2a2a2a */
+    .grave-footer { display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #111;font-size:0.65rem;color:#64748b; } /* Changed from #2a2a2a */
+    .cancel-count { display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#111;border:1px solid #1a1a1a;color:#444;font-size:0.75rem;font-weight:bold; }
+
+    .filter-btn { border-color:#151515;color:#64748b; } /* Changed from #2a2a2a */
+    .filter-btn:hover { border-color:#333;color:#666; }
+    .filter-btn.active { border-color:#555;color:#888;background:#0f0f0f; }
+
+    .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.93);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity 0.2s; }
+    .modal-overlay.open { opacity:1;pointer-events:all; }
+    .modal { background:#0a0a0a;border:1px solid #222;border-radius:10px;max-width:520px;width:100%;padding:32px;position:relative;transform:translateY(20px);transition:transform 0.2s;max-height:85vh;overflow-y:auto;text-align:center; }
+    .modal-overlay.open .modal { transform:translateY(0); }
+    .modal-close { position:absolute;top:16px;right:16px;background:none;border:none;color:#64748b;font-size:1.2rem;cursor:pointer;padding:4px 8px; } /* Changed from #333 */
+    .modal-close:hover { color:#888; }
+    .modal-rip { font-size:0.65rem;letter-spacing:0.3em;color:#64748b;margin-bottom:14px; } /* Changed from #2a2a2a */
+    .modal-title { font-size:1.4rem;color:#888;margin-bottom:8px; }
+    .modal-dates { font-size:0.72rem;color:#64748b;letter-spacing:0.1em;margin-bottom:20px; } /* Changed from #2a2a2a */
+    .modal-eulogy { font-size:0.9rem;color:#cbd5e0;line-height:2;font-style:italic;margin-bottom:24px;padding:0 10px; } /* Changed from #444 */
+    .modal-details { text-align:left;border-top:1px solid #111;padding-top:20px; }
+    .modal-detail-row { display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #0f0f0f;font-size:0.8rem; }
+    .modal-detail-label { color:#64748b;letter-spacing:0.1em;text-transform:uppercase;font-size:0.65rem; } /* Changed from #2a2a2a */
+    .modal-detail-val { color:#555; }
+    .modal-delete { margin-top:20px;padding-top:16px;border-top:1px solid #111;text-align:right; }
+
+    .empty-state { color:#64748b; } /* Changed from #222 */
+    footer { border-top-color:#111;color:#64748b; } /* Changed from #222 */
+    .btn { background:#555;color:#fff; }
+    .btn:hover { background:#666; }
+    .btn-ghost { background:transparent;color:#64748b;border-color:#1a1a1a; } /* Changed from #333 */
+    .btn-ghost:hover { border-color:#444;color:#666; }
+
+    .groups-modal { border-color:#2a2a2a; }
+    .groups-modal h3 { color:#aaa; }
+    .group-item { background:#080808;border-color:#151515; }
+    .group-item-name { color:#888; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">The Wreckage</a>
+  <a href="archive.html">Archive</a>
+  <a href="evidence.html">Evidence</a>
+  <a href="unfinished.html" class="active">Unfinished</a>
+  <div class="group-selector-wrap">
+    <select id="group-select" onchange="switchGroup(this.value)"></select>
+    <button class="btn-manage-groups" onclick="openGroupsModal()">⚙ Groups</button>
+    <span id="nav-user" style="font-size:0.72rem;letter-spacing:0.1em;color:#64748b;white-space:nowrap;"></span> <!-- Changed from #2a2a2a -->
+    <button class="btn-manage-groups" onclick="logout()" style="border-color:#151515;color:#64748b;">↩ Logout</button> <!-- Changed from #2a2a2a -->
+  </div>
+</nav>
+
+<main>
+  <div class="page-hero">
+    <div class="page-hero-label">Section 03</div>
+    <h1>Unfinished Plans</h1>
+    <p>A graveyard of intentions. Things that were supposed to happen.</p>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <h2 style="color:#64748b;">The Graveyard — <span id="group-label" style="color:#1a1a1a;font-size:0.85rem;letter-spacing:0.05em;text-transform:none;"></span></h2> <!-- Changed from #2a2a2a -->
+    <button class="btn" id="toggle-form-btn" onclick="toggleForm()">+ Bury a Plan</button>
+  </div>
+
+  <!-- FORM -->
+  <div class="panel" id="unfinished-form" style="display:none;">
+    <div class="panel-title">New Headstone</div>
+    <div class="form-group">
+      <label>The Plan *</label>
+      <input type="text" id="f-plan" placeholder="What were you all supposed to do"/>
+      <div class="error-msg" id="err-plan">The plan is required.</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Who Suggested It *</label>
+        <input type="text" id="f-suggester" placeholder="The dreamer"/>
+        <div class="error-msg" id="err-suggester">Name the dreamer.</div>
+      </div>
+      <div class="form-group">
+        <label>Who Killed It *</label>
+        <input type="text" id="f-killer" placeholder="The culprit"/>
+        <div class="error-msg" id="err-killer">Name the culprit.</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date Proposed *</label>
+        <input type="date" id="f-date"/>
+        <div class="error-msg" id="err-date">Date is required.</div>
+      </div>
+      <div class="form-group">
+        <label>Times Cancelled *</label>
+        <input type="number" id="f-cancels" min="0" placeholder="How many times"/>
+        <div class="error-msg" id="err-cancels">Enter cancellation count.</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Cause of Death *</label>
+      <div class="cod-grid">
+        <div><input class="cod-option" type="radio" name="cod" id="cod-1" value="nobody-showed-up"/><label for="cod-1">Nobody Showed Up</label></div>
+        <div><input class="cod-option" type="radio" name="cod" id="cod-2" value="funds-depleted"/><label for="cod-2">Funds Depleted</label></div>
+        <div><input class="cod-option" type="radio" name="cod" id="cod-3" value="forgotten-entirely"/><label for="cod-3">Forgotten Entirely</label></div>
+        <div><input class="cod-option" type="radio" name="cod" id="cod-4" value="killed-by-one-person"/><label for="cod-4">Killed By One Person</label></div>
+        <div><input class="cod-option" type="radio" name="cod" id="cod-5" value="act-of-god"/><label for="cod-5">Act of God</label></div>
+        <div><input class="cod-option" type="radio" name="cod" id="cod-6" value="still-technically-alive"/><label for="cod-6">Still Technically Alive</label></div>
+      </div>
+      <div class="error-msg" id="err-cod">Select cause of death.</div>
+    </div>
+    <div class="form-group">
+      <label>Current Status *</label>
+      <select id="f-status">
+        <option value="">— Select Status —</option>
+        <option value="dead">Dead</option>
+        <option value="life-support">On Life Support</option>
+        <option value="discussed">Somehow Still Being Discussed</option>
+        <option value="zombie">Zombie (keeps coming back)</option>
+      </select>
+      <div class="error-msg" id="err-status">Select a status.</div>
+    </div>
+    <div class="form-group">
+      <label>Eulogy *</label>
+      <input type="text" id="f-eulogy" placeholder="One line farewell to the plan that never was"/>
+      <div class="error-msg" id="err-eulogy">Write a eulogy.</div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button class="btn" onclick="submitPlan()">Lay to Rest</button>
+      <button class="btn btn-ghost" onclick="toggleForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterPlans('all',this)">All</button>
+    <button class="filter-btn" onclick="filterPlans('dead',this)">Dead</button>
+    <button class="filter-btn" onclick="filterPlans('life-support',this)">Life Support</button>
+    <button class="filter-btn" onclick="filterPlans('zombie',this)">Zombie</button>
+    <button class="filter-btn" onclick="filterPlans('discussed',this)">Still Discussed</button>
+  </div>
+
+  <div class="graves-grid" id="graves-grid"></div>
+  <div class="empty-state" id="empty-state"><div class="empty-icon">🪦</div><div>The graveyard is empty for this group.</div></div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div class="modal-rip">R.I.P.</div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-dates" id="modal-dates"></div>
+    <div class="modal-eulogy" id="modal-eulogy"></div>
+    <div class="modal-details" id="modal-details"></div>
+    <div class="modal-delete">
+      <button class="btn btn-ghost" style="font-size:0.7rem;" onclick="deletePlan()">Remove from Graveyard</button>
+    </div>
+  </div>
+</div>
+
+<!-- GROUPS MODAL -->
+<div class="groups-modal-overlay" id="groups-modal-overlay" onclick="closeGroupsModal(event)">
+  <div class="groups-modal">
+    <h3>⚙ Manage Groups</h3>
+    <div class="group-list" id="group-list"></div>
+    <div class="group-add-row">
+      <input type="text" id="new-group-input" placeholder="New group name" onkeydown="if(event.key==='Enter')addGroup()"/>
+      <button class="btn" onclick="addGroup()">Create</button>
+    </div>
+    <div style="margin-top:16px;text-align:right;">
+      <button class="btn-ghost btn" onclick="closeGroupsModalDirect()" style="font-size:0.75rem;">Close</button>
+    </div>
+  </div>
+</div>
+
+<footer><p>The Wreckage &nbsp;·&nbsp; Unfinished Plans</p></footer>
+
+<script src="auth.js"></script>
+<script src="groups.js"></script>
+<script>
+  requireLogin();
+  const __s = getSession();
+  if (__s) document.getElementById('nav-user').textContent = '👤 ' + __s.username;
+  const COD_LABELS={'nobody-showed-up':'Nobody Showed Up','funds-depleted':'Funds Depleted','forgotten-entirely':'Forgotten Entirely','killed-by-one-person':'Killed By One Person','act-of-god':'Act of God','still-technically-alive':'Still Technically Alive'};
+  const STATUS_LABELS={'dead':'Dead','life-support':'On Life Support','discussed':'Still Being Discussed','zombie':'Zombie'};
+
+  const SAMPLES=[
+    {id:3001,plan:"Pondicherry Trip",suggester:"Meera",killer:"Dev",date:"2024-06-10",cancels:4,cod:"nobody-showed-up",status:"zombie",eulogy:"She died four times and keeps coming back every month like nothing happened."},
+    {id:3002,plan:"Movie Marathon Night at Dev's",suggester:"Arjun",killer:"Dev",date:"2024-07-22",cancels:2,cod:"killed-by-one-person",status:"dead",eulogy:"Dev said yes every time and then had 'something to do' on the actual day. Twice."},
+    {id:3003,plan:"Cook a proper meal together",suggester:"Priya",killer:"everyone",date:"2024-10-05",cancels:1,cod:"forgotten-entirely",status:"dead",eulogy:"Nobody remembered this was even a plan until this entry was written."},
+  ];
+
+  let plans=[];
+  let currentId=null;
+  let currentFilter='all';
+
+  function getKey(){return 'wreckage_unfinished_'+getCurrentGroupId();}
+
+  function loadPlans(){
+    plans=JSON.parse(localStorage.getItem(getKey())||'null');
+    if(plans===null){plans=SAMPLES;localStorage.setItem(getKey(),JSON.stringify(plans));}
+  }
+
+  function toggleForm(){
+    const form=document.getElementById('unfinished-form');
+    const btn =document.getElementById('toggle-form-btn');
+    const open=form.style.display==='block';
+    form.style.display=open?'none':'block';
+    btn.textContent=open?'+ Bury a Plan':'✕ Cancel';
+    if(!open)return;
+    resetForm();
+  }
+
+  function resetForm(){
+    ['f-plan','f-suggester','f-killer','f-date','f-cancels','f-eulogy'].forEach(id=>document.getElementById(id).value='');
+    document.querySelectorAll('.cod-option').forEach(r=>r.checked=false);
+    document.getElementById('f-status').value='';
+    clearErrors();
+  }
+
+  function clearErrors(){
+    document.querySelectorAll('.error-msg').forEach(e=>e.classList.remove('visible'));
+    document.querySelectorAll('.invalid').forEach(e=>e.classList.remove('invalid'));
+  }
+
+  function showError(fid,eid){const f=document.getElementById(fid),e=document.getElementById(eid);if(f)f.classList.add('invalid');if(e)e.classList.add('visible');}
+
+  function validate(){
+    clearErrors();let v=true;
+    if(!document.getElementById('f-plan').value.trim())     {showError('f-plan','err-plan');v=false;}
+    if(!document.getElementById('f-suggester').value.trim()){showError('f-suggester','err-suggester');v=false;}
+    if(!document.getElementById('f-killer').value.trim())   {showError('f-killer','err-killer');v=false;}
+    if(!document.getElementById('f-date').value)            {showError('f-date','err-date');v=false;}
+    if(document.getElementById('f-cancels').value==='')     {showError('f-cancels','err-cancels');v=false;}
+    if(!document.querySelector('.cod-option:checked'))       {document.getElementById('err-cod').classList.add('visible');v=false;}
+    if(!document.getElementById('f-status').value)          {showError('f-status','err-status');v=false;}
+    if(!document.getElementById('f-eulogy').value.trim())   {showError('f-eulogy','err-eulogy');v=false;}
+    return v;
+  }
+
+  function submitPlan(){
+    if(!validate())return;
+    const p={id:Date.now(),plan:document.getElementById('f-plan').value.trim(),suggester:document.getElementById('f-suggester').value.trim(),killer:document.getElementById('f-killer').value.trim(),date:document.getElementById('f-date').value,cancels:parseInt(document.getElementById('f-cancels').value),cod:document.querySelector('.cod-option:checked').value,status:document.getElementById('f-status').value,eulogy:document.getElementById('f-eulogy').value.trim()};
+    plans.unshift(p);
+    localStorage.setItem(getKey(),JSON.stringify(plans));
+    toggleForm();renderPlans();
+  }
+
+  function renderPlans(){
+    const grid=document.getElementById('graves-grid');
+    const empty=document.getElementById('empty-state');
+    const filtered=currentFilter==='all'?plans:plans.filter(p=>p.status===currentFilter);
+    grid.innerHTML='';
+    empty.style.display=filtered.length?'none':'block';
+    filtered.forEach(p=>{
+      const card=document.createElement('div');
+      card.className='grave-card';
+      card.onclick=()=>openModal(p.id);
+      card.innerHTML=`<div class="grave-rip">R.I.P.</div><div class="grave-title">${p.plan}</div><div class="grave-dates">Proposed ${formatDate(p.date)}</div><div class="grave-cod">${COD_LABELS[p.cod]||p.cod}</div><div class="grave-eulogy">"${p.eulogy}"</div><div class="grave-footer"><span>${STATUS_LABELS[p.status]||p.status}</span><span title="Times cancelled"><span class="cancel-count">${p.cancels}</span> cancels</span></div>`;
+      grid.appendChild(card);
+    });
+  }
+
+  function filterPlans(f,btn){
+    currentFilter=f;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderPlans();
+  }
+
+  function openModal(id){
+    const p=plans.find(x=>x.id===id);
+    if(!p)return;
+    currentId=id;
+    document.getElementById('modal-title').textContent=p.plan;
+    document.getElementById('modal-dates').textContent='Proposed '+formatDate(p.date)+'  ·  Cancelled '+p.cancels+' time'+(p.cancels!==1?'s':'');
+    document.getElementById('modal-eulogy').textContent='"'+p.eulogy+'"';
+    document.getElementById('modal-details').innerHTML=`<div class="modal-detail-row"><span class="modal-detail-label">Suggested By</span><span class="modal-detail-val">${p.suggester}</span></div><div class="modal-detail-row"><span class="modal-detail-label">Killed By</span><span class="modal-detail-val">${p.killer}</span></div><div class="modal-detail-row"><span class="modal-detail-label">Cause of Death</span><span class="modal-detail-val">${COD_LABELS[p.cod]||p.cod}</span></div><div class="modal-detail-row"><span class="modal-detail-label">Current Status</span><span class="modal-detail-val">${STATUS_LABELS[p.status]||p.status}</span></div>`;
+    document.getElementById('modal-overlay').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+
+  function closeModal(e){if(e.target===document.getElementById('modal-overlay'))closeModalDirect();}
+  function closeModalDirect(){document.getElementById('modal-overlay').classList.remove('open');document.body.style.overflow='';currentId=null;}
+
+  function deletePlan(){
+    if(!currentId||!confirm('Remove this plan from the graveyard?'))return;
+    plans=plans.filter(p=>p.id!==currentId);
+    localStorage.setItem(getKey(),JSON.stringify(plans));
+    closeModalDirect();renderPlans();
+  }
+
+  function formatDate(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
+
+  window.addEventListener('groupChanged',()=>{
+    const g=getGroups().find(x=>x.id===getCurrentGroupId());
+    document.getElementById('group-label').textContent=g?g.name:'';
+    loadPlans();renderPlans();
+  });
+
+  initGroups();
+</script>
+</body>
+</html>

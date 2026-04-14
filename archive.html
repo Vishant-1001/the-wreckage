@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Archive — The Wreckage</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    :root {
+      --legendary:    #f0b429;
+      --cursed:       #e53935;
+      --chaotic:      #4f8ef7;
+      --unhinged:     #39d353;
+      --bittersweet:  #9c6fc7;
+      --unexplainable:#888888;
+    }
+    .page-hero { padding:48px 0 32px;border-bottom:1px solid #1a1a1a;margin-bottom:36px; }
+    .page-hero-label { font-size:0.65rem;letter-spacing:0.35em;text-transform:uppercase;color:#64748b;margin-bottom:10px; } /* Changed from #333 */
+    .page-hero h1 { color:#fff;margin-bottom:8px; }
+    .page-hero p  { color:#94a3b8;font-size:0.82rem; } /* Changed from #444 */
+
+    .archive-form { display:none; }
+    .archive-form.open { display:block;animation:slideDown 0.3s ease; }
+    @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+
+    .mood-grid { display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:4px; }
+    .mood-option { display:none; }
+    .mood-option + label { display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:1px solid #222;border-radius:6px;cursor:pointer;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;transition:all 0.2s;text-align:center; } /* Changed from #555 */
+    .mood-option + label .mood-dot { width:10px;height:10px;border-radius:50%; }
+    .mood-option[value="legendary"]     + label .mood-dot { background:var(--legendary); }
+    .mood-option[value="cursed"]        + label .mood-dot { background:var(--cursed); }
+    .mood-option[value="chaotic"]       + label .mood-dot { background:var(--chaotic); }
+    .mood-option[value="unhinged"]      + label .mood-dot { background:var(--unhinged); }
+    .mood-option[value="bittersweet"]   + label .mood-dot { background:var(--bittersweet); }
+    .mood-option[value="unexplainable"] + label .mood-dot { background:var(--unexplainable); }
+    .mood-option:checked + label { border-color:#555;color:#fff;background:#111; }
+
+    .vibe-slider-wrap { display:flex;align-items:center;gap:12px; }
+    input[type=range] { flex:1;-webkit-appearance:none;height:2px;background:#222;border-radius:2px;outline:none;border:none;padding:0;margin:0; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;cursor:pointer; }
+    .vibe-val { font-size:1.1rem;font-weight:bold;color:#fff;min-width:24px;text-align:center; }
+
+    .cards-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px; }
+
+    .archive-card { border-radius:8px;border:1px solid #1e1e1e;padding:22px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;background:#0f0f0f; }
+    .archive-card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--mood-color,#444); }
+    .archive-card:hover { transform:translateY(-3px);border-color:#2a2a2a; }
+
+    .card-mood-badge { display:inline-block;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;padding:3px 8px;border-radius:20px;margin-bottom:12px;border:1px solid; }
+    .card-title-text { font-size:1rem;font-weight:bold;color:#fff;margin-bottom:6px; }
+    .card-meta { font-size:0.72rem;color:#94a3b8;letter-spacing:0.08em;margin-bottom:10px; } /* Changed from #444 */
+    .card-preview { font-size:0.8rem;color:#cbd5e0;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden; } /* Changed from #555 */
+    .card-footer { display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #1a1a1a;font-size:0.68rem;color:#94a3b8;letter-spacing:0.08em; } /* Changed from #444 */
+    .card-vibe { color:#fff;font-weight:bold; }
+    .card-status-badge { font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px;border-radius:20px;border:1px solid #222;color:#cbd5e0; } /* Changed from #555 */
+    .card-conv-count { font-size:0.65rem;color:#cbd5e0; } /* Changed from #555 */
+
+    /* MODAL */
+    .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity 0.2s; }
+    .modal-overlay.open { opacity:1;pointer-events:all; }
+    .modal { background:#0f0f0f;border:1px solid #222;border-radius:10px;max-width:580px;width:100%;padding:32px;position:relative;transform:translateY(20px);transition:transform 0.2s;max-height:88vh;overflow-y:auto; }
+    .modal-overlay.open .modal { transform:translateY(0); }
+    .modal-close { position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:1.2rem;cursor:pointer;padding:4px 8px; } /* Changed from #444 */
+    .modal-close:hover { color:#fff; }
+    .modal-mood-bar { height:3px;border-radius:2px;margin-bottom:24px; }
+    .modal-title { font-size:1.4rem;color:#fff;margin-bottom:8px;letter-spacing:0.05em; }
+    .modal-meta  { font-size:0.72rem;color:#94a3b8;letter-spacing:0.1em;margin-bottom:20px; } /* Changed from #444 */
+    .modal-body  { font-size:0.88rem;color:#cbd5e0;line-height:1.9;margin-bottom:24px; } /* Changed from #777 */
+    .modal-stats { display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding-top:20px;border-top:1px solid #1a1a1a; }
+    .modal-stat  { text-align:center; }
+    .modal-stat-val { font-size:1rem;color:#fff;font-weight:bold; }
+    .modal-stat-lbl { font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:#94a3b8;margin-top:3px; } /* Changed from #444 */
+    .modal-delete { margin-top:20px;padding-top:16px;border-top:1px solid #1a1a1a;text-align:right; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">The Wreckage</a>
+  <a href="archive.html" class="active">Archive</a>
+  <a href="evidence.html">Evidence</a>
+  <a href="unfinished.html">Unfinished</a>
+  <div class="group-selector-wrap">
+    <select id="group-select" onchange="switchGroup(this.value)"></select>
+    <button class="btn-manage-groups" onclick="openGroupsModal()">⚙ Groups</button>
+    <span id="nav-user" style="font-size:0.72rem;letter-spacing:0.1em;color:#94a3b8;white-space:nowrap;"></span> <!-- Changed from #444 -->
+    <button class="btn-manage-groups" onclick="logout()" style="border-color:#2a2a2a;color:#94a3b8;">↩ Logout</button> <!-- Changed from #555 -->
+  </div>
+</nav>
+
+<main>
+  <div class="page-hero">
+    <div class="page-hero-label">Section 01</div>
+    <h1>The Archive</h1>
+    <p>Iconic moments. Documented forever. The mood decides the colour.</p>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <h2>Entries — <span id="group-label" style="color:#cbd5e0;font-size:0.85rem;letter-spacing:0.05em;text-transform:none;"></span></h2> <!-- Changed from #555 -->
+    <button class="btn" id="toggle-form-btn" onclick="toggleForm()">+ Log a Moment</button>
+  </div>
+
+  <!-- FORM -->
+  <div class="archive-form panel" id="archive-form">
+    <div class="panel-title">New Entry</div>
+    <div class="form-group">
+      <label>Title of the Moment *</label>
+      <input type="text" id="f-title" placeholder="What do you call this one"/>
+      <div class="error-msg" id="err-title">Title is required.</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date *</label>
+        <input type="date" id="f-date"/>
+        <div class="error-msg" id="err-date">Date is required.</div>
+      </div>
+      <div class="form-group">
+        <label>Who Was Involved *</label>
+        <input type="text" id="f-people" placeholder="Names, separated by commas"/>
+        <div class="error-msg" id="err-people">At least one person required.</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>What Happened *</label>
+      <textarea id="f-story" placeholder="Tell it properly. Full story. No holding back."></textarea>
+      <div class="error-msg" id="err-story">The story is required.</div>
+    </div>
+    <div class="form-group">
+      <label>Mood *</label>
+      <div class="mood-grid">
+        <div><input class="mood-option" type="radio" name="mood" id="m-legendary" value="legendary"/><label for="m-legendary"><span class="mood-dot"></span>Legendary</label></div>
+        <div><input class="mood-option" type="radio" name="mood" id="m-cursed" value="cursed"/><label for="m-cursed"><span class="mood-dot"></span>Cursed</label></div>
+        <div><input class="mood-option" type="radio" name="mood" id="m-chaotic" value="chaotic"/><label for="m-chaotic"><span class="mood-dot"></span>Chaotic</label></div>
+        <div><input class="mood-option" type="radio" name="mood" id="m-unhinged" value="unhinged"/><label for="m-unhinged"><span class="mood-dot"></span>Unhinged</label></div>
+        <div><input class="mood-option" type="radio" name="mood" id="m-bittersweet" value="bittersweet"/><label for="m-bittersweet"><span class="mood-dot"></span>Bittersweet</label></div>
+        <div><input class="mood-option" type="radio" name="mood" id="m-unexplainable" value="unexplainable"/><label for="m-unexplainable"><span class="mood-dot"></span>Unexplainable</label></div>
+      </div>
+      <div class="error-msg" id="err-mood">Select a mood.</div>
+    </div>
+    <div class="form-group">
+      <label>Vibe Rating — <span id="vibe-display">5</span>/10</label>
+      <div class="vibe-slider-wrap">
+        <input type="range" id="f-vibe" min="1" max="10" value="5" oninput="document.getElementById('vibe-display').textContent=this.value;document.getElementById('vibe-val').textContent=this.value;"/>
+        <span class="vibe-val" id="vibe-val">5</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Status *</label>
+      <select id="f-status">
+        <option value="">— Select Status —</option>
+        <option value="still-talked-about">Still Talked About</option>
+        <option value="fading">Fading</option>
+        <option value="legendary">Legendary</option>
+        <option value="buried">Buried Forever</option>
+      </select>
+      <div class="error-msg" id="err-status">Select a status.</div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button class="btn" onclick="submitEntry()">Save Entry</button>
+      <button class="btn btn-ghost" onclick="toggleForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterCards('all',this)">All</button>
+    <button class="filter-btn" onclick="filterCards('legendary',this)">Legendary</button>
+    <button class="filter-btn" onclick="filterCards('cursed',this)">Cursed</button>
+    <button class="filter-btn" onclick="filterCards('chaotic',this)">Chaotic</button>
+    <button class="filter-btn" onclick="filterCards('unhinged',this)">Unhinged</button>
+    <button class="filter-btn" onclick="filterCards('bittersweet',this)">Bittersweet</button>
+    <button class="filter-btn" onclick="filterCards('unexplainable',this)">Unexplainable</button>
+  </div>
+
+  <div class="cards-grid" id="cards-grid"></div>
+  <div class="empty-state" id="empty-state"><div class="empty-icon">📁</div><div>No entries yet for this group.</div></div>
+</main>
+
+<!-- ENTRY MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div class="modal-mood-bar" id="modal-bar"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-meta"  id="modal-meta"></div>
+    <div class="modal-body"  id="modal-body"></div>
+    <div class="modal-stats" id="modal-stats"></div>
+
+    <!-- CONVERSATION THREAD -->
+    <div class="conv-thread">
+      <div class="conv-thread-title">💬 Group Conversation</div>
+      <div class="conv-messages" id="conv-messages"></div>
+      <div class="conv-input-row">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <span style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;">Posting as</span> <!-- Changed from #444 -->
+          <span id="conv-username-display" style="font-size:0.82rem;color:#fff;letter-spacing:0.05em;"></span>
+        </div>
+        <div class="conv-send-row">
+          <input type="text" id="conv-msg" placeholder="Say something about this moment..." onkeydown="if(event.key==='Enter')sendMessage()"/>
+          <button class="btn" style="font-size:0.78rem;padding:9px 14px;" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-delete">
+      <button class="btn btn-ghost" style="font-size:0.7rem;" onclick="deleteEntry()">Delete Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- GROUPS MODAL -->
+<div class="groups-modal-overlay" id="groups-modal-overlay" onclick="closeGroupsModal(event)">
+  <div class="groups-modal">
+    <h3>⚙ Manage Groups</h3>
+    <div class="group-list" id="group-list"></div>
+    <div class="group-add-row">
+      <input type="text" id="new-group-input" placeholder="New group name" onkeydown="if(event.key==='Enter')addGroup()"/>
+      <button class="btn" onclick="addGroup()">Create</button>
+    </div>
+    <div style="margin-top:16px;text-align:right;">
+      <button class="btn btn-ghost" onclick="closeGroupsModalDirect()" style="font-size:0.75rem;">Close</button>
+    </div>
+  </div>
+</div>
+
+<footer><p>The Wreckage &nbsp;·&nbsp; The Archive</p></footer>
+
+<script src="auth.js"></script>
+<script src="groups.js"></script>
+<script>
+  requireLogin();
+  const __s = getSession();
+  if (__s) {
+    document.getElementById('nav-user').textContent = '👤 ' + __s.username;
+    document.getElementById('conv-username-display').textContent = __s.username;
+  }
+  const MOOD_COLORS = {
+    legendary:'#f0b429',cursed:'#e53935',chaotic:'#4f8ef7',
+    unhinged:'#39d353',bittersweet:'#9c6fc7',unexplainable:'#888888'
+  };
+  const STATUS_LABELS = {
+    'still-talked-about':'Still Talked About','fading':'Fading',
+    'legendary':'Legendary','buried':'Buried Forever'
+  };
+
+  // SAMPLE DATA
+  const SAMPLES = [
+    {id:1001,title:"The Night the Auto Got Lost for 2 Hours",date:"2024-08-14",people:"Arjun, Priya, Dev, Meera",story:"We told the auto driver 'Besant Nagar beach' and somehow ended up near the airport. Nobody noticed for 40 minutes because everyone was arguing about whether Interstellar is overrated. The driver was also convinced he was right. We paid 380 rupees for a trip that should have been 80.",mood:"chaotic",vibe:"9",status:"still-talked-about",conversations:[{name:"Arjun",text:"Bro the meter was running the whole time i was internally crying",ts:1723656000000},{name:"Dev",text:"I stand by my take. Interstellar is overrated. Worth the detour.",ts:1723656120000}]},
+    {id:1002,title:"Priya's Birthday Surprise That Almost Killed Her",date:"2024-11-03",people:"Dev, Meera, Arjun",story:"We planned a surprise birthday for Priya. Hid behind the door of her hostel room for 22 minutes in the dark. When she opened the door she screamed so loud that the warden came running and we all had to explain ourselves. Priya said she genuinely thought she was about to be robbed. The cake survived. The warden was not amused.",mood:"legendary",vibe:"10",status:"legendary",conversations:[{name:"Meera",text:"Her face when the lights came on was the funniest thing I have ever seen",ts:1730649600000},{name:"Priya",text:"I thought I was going to die. I am still not okay.",ts:1730650200000},{name:"Arjun",text:"The warden's face when she saw the cake though",ts:1730650500000}]},
+    {id:1003,title:"Dev Fails His Own Bet",date:"2024-09-22",people:"Dev, Arjun",story:"Dev bet Arjun 500 rupees that he could wake up before 8am for one entire week. He set 5 alarms. Slept through all 5 of them every single day for 7 days in a row. The 8am alarm sounds were reportedly heard by his roommates as background noise at this point. He paid Arjun the 500 rupees in coins.",mood:"cursed",vibe:"7",status:"still-talked-about",conversations:[{name:"Dev",text:"I was doing important sleep research",ts:1727049600000}]},
+  ];
+
+  let entries = [];
+  let currentId = null;
+  let currentFilter = 'all';
+
+  function getKey() { return 'wreckage_archive_' + getCurrentGroupId(); }
+
+  function loadEntries() {
+    entries = JSON.parse(localStorage.getItem(getKey()) || 'null');
+    if (entries === null) {
+      // First time for this group — seed samples
+      entries = SAMPLES.map(s => ({...s, id: Date.now() + Math.random()}));
+      // Give them proper IDs
+      entries = SAMPLES.map((s,i) => ({...s, id: 1000+i}));
+      localStorage.setItem(getKey(), JSON.stringify(entries));
+    }
+  }
+
+  // FORM TOGGLE
+  function toggleForm() {
+    const form = document.getElementById('archive-form');
+    const btn  = document.getElementById('toggle-form-btn');
+    const open = form.classList.toggle('open');
+    btn.textContent = open ? '✕ Cancel' : '+ Log a Moment';
+    if (!open) resetForm();
+  }
+
+  function resetForm() {
+    ['f-title','f-date','f-people','f-story'].forEach(id => document.getElementById(id).value='');
+    document.querySelectorAll('.mood-option').forEach(r => r.checked=false);
+    document.getElementById('f-status').value='';
+    document.getElementById('f-vibe').value=5;
+    document.getElementById('vibe-display').textContent='5';
+    document.getElementById('vibe-val').textContent='5';
+    clearErrors();
+  }
+
+  function clearErrors() {
+    document.querySelectorAll('.error-msg').forEach(e=>e.classList.remove('visible'));
+    document.querySelectorAll('.invalid').forEach(e=>e.classList.remove('invalid'));
+  }
+
+  function showError(fid,eid) {
+    const f=document.getElementById(fid),e=document.getElementById(eid);
+    if(f)f.classList.add('invalid');
+    if(e)e.classList.add('visible');
+  }
+
+  function validate() {
+    clearErrors();let v=true;
+    if(!document.getElementById('f-title').value.trim())  {showError('f-title','err-title');v=false;}
+    if(!document.getElementById('f-date').value)          {showError('f-date','err-date');v=false;}
+    if(!document.getElementById('f-people').value.trim()) {showError('f-people','err-people');v=false;}
+    if(!document.getElementById('f-story').value.trim())  {showError('f-story','err-story');v=false;}
+    if(!document.querySelector('.mood-option:checked'))    {document.getElementById('err-mood').classList.add('visible');v=false;}
+    if(!document.getElementById('f-status').value)         {showError('f-status','err-status');v=false;}
+    return v;
+  }
+
+  function submitEntry() {
+    if(!validate()) return;
+    const entry = {
+      id:       Date.now(),
+      title:    document.getElementById('f-title').value.trim(),
+      date:     document.getElementById('f-date').value,
+      people:   document.getElementById('f-people').value.trim(),
+      story:    document.getElementById('f-story').value.trim(),
+      mood:     document.querySelector('.mood-option:checked').value,
+      vibe:     document.getElementById('f-vibe').value,
+      status:   document.getElementById('f-status').value,
+      conversations: [],
+    };
+    entries.unshift(entry);
+    localStorage.setItem(getKey(), JSON.stringify(entries));
+    toggleForm();
+    renderCards();
+  }
+
+  function renderCards() {
+    const grid  = document.getElementById('cards-grid');
+    const empty = document.getElementById('empty-state');
+    const filtered = currentFilter==='all' ? entries : entries.filter(e=>e.mood===currentFilter);
+    grid.innerHTML='';
+    empty.style.display=filtered.length?'none':'block';
+    filtered.forEach(e=>{
+      const color=MOOD_COLORS[e.mood]||'#444';
+      const card=document.createElement('div');
+      card.className='archive-card';
+      card.style.setProperty('--mood-color',color);
+      card.onclick=()=>openModal(e.id);
+      const convCount=(e.conversations||[]).length;
+      card.innerHTML=`
+        <div class="card-mood-badge" style="color:${color};border-color:${color}33;background:${color}11;">${e.mood}</div>
+        <div class="card-title-text">${e.title}</div>
+        <div class="card-meta">${formatDate(e.date)} &nbsp;·&nbsp; ${e.people}</div>
+        <div class="card-preview">${e.story}</div>
+        <div class="card-footer">
+          <span>Vibe <span class="card-vibe">${e.vibe}/10</span></span>
+          <span class="card-status-badge">${STATUS_LABELS[e.status]||e.status}</span>
+          <span class="card-conv-count">💬 ${convCount}</span>
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
+
+  function filterCards(mood,btn) {
+    currentFilter=mood;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCards();
+  }
+
+  // MODAL
+  function openModal(id) {
+    const e=entries.find(x=>x.id===id);
+    if(!e)return;
+    currentId=id;
+    const color=MOOD_COLORS[e.mood]||'#444';
+    document.getElementById('modal-bar').style.background=color;
+    document.getElementById('modal-title').textContent=e.title;
+    document.getElementById('modal-meta').textContent=`${formatDate(e.date)}  ·  ${e.people}  ·  ${e.mood.toUpperCase()}`;
+    document.getElementById('modal-body').textContent=e.story;
+    document.getElementById('modal-stats').innerHTML=`
+      <div class="modal-stat"><div class="modal-stat-val" style="color:${color}">${e.vibe}/10</div><div class="modal-stat-lbl">Vibe</div></div>
+      <div class="modal-stat"><div class="modal-stat-val">${STATUS_LABELS[e.status]||e.status}</div><div class="modal-stat-lbl">Status</div></div>
+      <div class="modal-stat"><div class="modal-stat-val">${(e.conversations||[]).length}</div><div class="modal-stat-lbl">Replies</div></div>`;
+    renderConversation(e);
+    const ud = document.getElementById('conv-username-display');
+    if (ud) ud.textContent = getLoggedInUsername();
+    document.getElementById('modal-overlay').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+
+  function renderConversation(e) {
+    const container=document.getElementById('conv-messages');
+    const convs=e.conversations||[];
+    if(convs.length===0){
+      container.innerHTML='<div class="conv-no-messages">No messages yet. Be the first to say something.</div>';
+      return;
+    }
+    container.innerHTML=convs.map(c=>`
+      <div class="conv-msg">
+        <div class="conv-msg-name">${c.name}</div>
+        <div class="conv-msg-text">${c.text}</div>
+        <div class="conv-msg-time">${formatTs(c.ts)}</div>
+      </div>`).join('');
+    container.scrollTop=container.scrollHeight;
+  }
+
+  function sendMessage() {
+    const msgEl  = document.getElementById('conv-msg');
+    const text   = msgEl.value.trim();
+    const name   = getLoggedInUsername();
+    if (!text) { msgEl.classList.add('invalid'); msgEl.focus(); return; }
+    msgEl.classList.remove('invalid');
+
+    const entry = entries.find(x => x.id === currentId);
+    if (!entry) return;
+    if (!entry.conversations) entry.conversations = [];
+    entry.conversations.push({ name, text, ts: Date.now() });
+    localStorage.setItem(getKey(), JSON.stringify(entries));
+    msgEl.value = '';
+    renderConversation(entry);
+
+    const statEl = document.getElementById('modal-stats');
+    if (statEl) {
+      const vals = statEl.querySelectorAll('.modal-stat-val');
+      if (vals[2]) vals[2].textContent = entry.conversations.length;
+    }
+    renderCards();
+  }
+
+  function closeModal(e){if(e.target===document.getElementById('modal-overlay'))closeModalDirect();}
+  function closeModalDirect(){
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.body.style.overflow='';
+    currentId=null;
+  }
+
+  function deleteEntry(){
+    if(!currentId||!confirm('Delete this entry?'))return;
+    entries=entries.filter(e=>e.id!==currentId);
+    localStorage.setItem(getKey(),JSON.stringify(entries));
+    closeModalDirect();
+    renderCards();
+  }
+
+  function formatDate(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
+  function formatTs(ts){return new Date(ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}
+
+  // GROUP CHANGE
+  window.addEventListener('groupChanged',()=>{
+    const g=getGroups().find(x=>x.id===getCurrentGroupId());
+    document.getElementById('group-label').textContent=g?g.name:'';
+    loadEntries();
+    renderCards();
+  });
+
+  initGroups();
+</script>
+</body>
+</html>
