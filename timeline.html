@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timeline of Chaos — The Wreckage</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .timeline-container { position:relative; padding: 20px 0; }
+    .timeline-container::before { content:''; position:absolute; left:20px; top:0; bottom:0; width:2px; background:#1e1e1e; }
+    
+    .timeline-item { position:relative; margin-bottom:40px; padding-left:60px; }
+    .timeline-dot { position:absolute; left:12px; top:0; width:18px; height:18px; border-radius:50%; background:#0a0a0a; border:3px solid var(--accent, #fff); z-index:2; }
+    
+    .timeline-date { font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; color:#94a3b8; margin-bottom:8px; display:block; }
+    .timeline-content { background:#0f0f0f; border:1px solid #1e1e1e; border-radius:8px; padding:20px; position:relative; }
+    .timeline-content::before { content:''; position:absolute; left:-8px; top:10px; width:16px; height:16px; background:#0f0f0f; border-left:1px solid #1e1e1e; border-bottom:1px solid #1e1e1e; transform:rotate(45deg); }
+    
+    .timeline-type { font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; padding:2px 8px; border-radius:20px; margin-bottom:12px; display:inline-block; border:1px solid; }
+    .timeline-title { font-size:1.1rem; font-weight:bold; color:#fff; margin-bottom:8px; }
+    .timeline-desc { font-size:0.85rem; color:#cbd5e0; line-height:1.6; }
+    .timeline-footer { margin-top:12px; padding-top:10px; border-top:1px solid #1a1a1a; font-size:0.7rem; color:#94a3b8; display:flex; justify-content:space-between; }
+
+    @media (max-width: 640px) {
+      .timeline-container::before { left: 15px; }
+      .timeline-item { padding-left: 45px; }
+      .timeline-dot { left: 7px; width: 16px; height: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">The Wreckage</a>
+  <a href="archive.html">Archive</a>
+  <a href="evidence.html">Evidence</a>
+  <a href="unfinished.html">Unfinished</a>
+  <a href="timeline.html" class="active">Timeline</a>
+  <div class="group-selector-wrap">
+    <select id="group-select" onchange="switchGroup(this.value)"></select>
+    <button class="btn-manage-groups" onclick="openGroupsModal()">⚙ Groups</button>
+    <span id="nav-user" style="font-size:0.72rem;letter-spacing:0.1em;color:#94a3b8;white-space:nowrap;"></span>
+    <button class="btn-manage-groups" onclick="logout()">↩ Logout</button>
+  </div>
+</nav>
+
+<main>
+  <div class="page-hero">
+    <div class="page-hero-label">Section 04</div>
+    <h1>Timeline of Chaos</h1>
+    <p>The complete history of your group. Every moment, every failure, every proof.</p>
+  </div>
+
+  <h2 id="group-label-title" style="color:#cbd5e0; margin-bottom:32px;">History — <span id="group-label" style="color:#555; font-size:0.85rem;"></span></h2>
+
+  <div class="timeline-container" id="timeline-container"></div>
+  
+  <div class="empty-state" id="empty-state" style="display:none;">
+    <div class="empty-icon">⏳</div>
+    <div>No history recorded for this group yet.</div>
+  </div>
+</main>
+
+<!-- GROUPS MODAL -->
+<div class="groups-modal-overlay" id="groups-modal-overlay" onclick="closeGroupsModal(event)">
+  <div class="groups-modal">
+    <h3>⚙ Manage Groups</h3>
+    <div class="group-list" id="group-list"></div>
+    <div class="group-add-row">
+      <input type="text" id="new-group-input" placeholder="New group name" onkeydown="if(event.key==='Enter')addGroup()"/>
+      <button class="btn" onclick="addGroup()">Create</button>
+    </div>
+    <div style="margin-top:16px;text-align:right;">
+      <button class="btn btn-ghost" onclick="closeGroupsModalDirect()" style="font-size:0.75rem;">Close</button>
+    </div>
+  </div>
+</div>
+
+<footer><p>The Wreckage &nbsp;·&nbsp; Timeline of Chaos</p></footer>
+
+<script src="auth.js"></script>
+<script src="groups.js"></script>
+<script>
+  requireLogin();
+  const __s = getSession();
+  if (__s) document.getElementById('nav-user').textContent = '👤 ' + __s.username;
+
+  const TYPE_CONFIG = {
+    archive:  { label: 'Moment', color: '#f0b429', icon: '📁' },
+    evidence: { label: 'Evidence', color: '#4f8ef7', icon: '🔍' },
+    plan:     { label: 'Failure', color: '#888', icon: '🪦' }
+  };
+
+  function renderTimeline() {
+    const gid = getCurrentGroupId();
+    const container = document.getElementById('timeline-container');
+    const empty = document.getElementById('empty-state');
+    
+    // Fetch all data
+    const archive = JSON.parse(localStorage.getItem('wreckage_archive_' + gid) || '[]');
+    const evidence = JSON.parse(localStorage.getItem('wreckage_evidence_' + gid) || '[]');
+    const plans = JSON.parse(localStorage.getItem('wreckage_unfinished_' + gid) || '[]');
+    
+    // Normalize data
+    const allItems = [
+      ...archive.map(i => ({ ...i, _type: 'archive', _date: new Date(i.date) })),
+      ...evidence.map(i => ({ ...i, _type: 'evidence', _date: new Date(i.date) })),
+      ...plans.map(i => ({ ...i, _type: 'plan', _date: new Date(i.date), title: i.plan, desc: i.eulogy }))
+    ];
+    
+    // Sort by date (newest first)
+    allItems.sort((a, b) => b._date - a._date);
+    
+    container.innerHTML = '';
+    if (allItems.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    
+    allItems.forEach(item => {
+      const cfg = TYPE_CONFIG[item._type];
+      const div = document.createElement('div');
+      div.className = 'timeline-item';
+      div.style.setProperty('--accent', cfg.color);
+      
+      div.innerHTML = `
+        <div class="timeline-dot"></div>
+        <span class="timeline-date">${formatDate(item.date)}</span>
+        <div class="timeline-content">
+          <div class="timeline-type" style="color:${cfg.color}; border-color:${cfg.color}33; background:${cfg.color}11;">
+            ${cfg.icon} ${cfg.label}
+          </div>
+          <div class="timeline-title">${item.title}</div>
+          <div class="timeline-desc">${item.desc || item.story || ''}</div>
+          <div class="timeline-footer">
+            <span>${item.people || item.suggester || ''}</span>
+            <span style="text-transform:uppercase; font-size:0.6rem;">${item.status || item.fileType || ''}</span>
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function formatDate(d) {
+    if (!d) return '—';
+    return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  window.addEventListener('groupChanged', () => {
+    const g = getGroups().find(x => x.id === getCurrentGroupId());
+    document.getElementById('group-label').textContent = g ? g.name : '';
+    renderTimeline();
+  });
+
+  initGroups();
+</script>
+</body>
+</html>

@@ -91,6 +91,7 @@
   <a href="archive.html" class="active">Archive</a>
   <a href="evidence.html">Evidence</a>
   <a href="unfinished.html">Unfinished</a>
+  <a href="timeline.html">Timeline</a>
   <div class="group-selector-wrap">
     <select id="group-select" onchange="switchGroup(this.value)"></select>
     <button class="btn-manage-groups" onclick="openGroupsModal()">⚙ Groups</button>
@@ -154,6 +155,13 @@
         <input type="range" id="f-vibe" min="1" max="10" value="5" oninput="document.getElementById('vibe-display').textContent=this.value;document.getElementById('vibe-val').textContent=this.value;"/>
         <span class="vibe-val" id="vibe-val">5</span>
       </div>
+    </div>
+    <div class="form-group">
+      <label>Link to Evidence (Optional)</label>
+      <select id="f-evidence-link">
+        <option value="">— No Evidence Linked —</option>
+      </select>
+      <div style="font-size:0.65rem; color:#94a3b8; margin-top:4px;">Connect this moment to a case in the Evidence Locker.</div>
     </div>
     <div class="form-group">
       <label>Status *</label>
@@ -276,6 +284,23 @@
       entries = SAMPLES.map((s,i) => ({...s, id: 1000+i}));
       localStorage.setItem(getKey(), JSON.stringify(entries));
     }
+    populateEvidenceLinks();
+  }
+
+  function populateEvidenceLinks() {
+    const gid = getCurrentGroupId();
+    const evidence = JSON.parse(localStorage.getItem('wreckage_evidence_' + gid) || '[]');
+    const select = document.getElementById('f-evidence-link');
+    if (!select) return;
+    
+    // Clear except first
+    select.innerHTML = '<option value="">— No Evidence Linked —</option>';
+    evidence.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.id;
+      opt.textContent = e.title;
+      select.appendChild(opt);
+    });
   }
 
   // FORM TOGGLE
@@ -330,6 +355,7 @@
       mood:     document.querySelector('.mood-option:checked').value,
       vibe:     document.getElementById('f-vibe').value,
       status:   document.getElementById('f-status').value,
+      evidenceId: document.getElementById('f-evidence-link').value,
       conversations: [],
     };
     entries.unshift(entry);
@@ -382,6 +408,23 @@
     document.getElementById('modal-title').textContent=e.title;
     document.getElementById('modal-meta').textContent=`${formatDate(e.date)}  ·  ${e.people}  ·  ${e.mood.toUpperCase()}`;
     document.getElementById('modal-body').textContent=e.story;
+    
+    // Evidence Link
+    if (e.evidenceId) {
+      const gid = getCurrentGroupId();
+      const evidence = JSON.parse(localStorage.getItem('wreckage_evidence_' + gid) || '[]');
+      const linked = evidence.find(x => String(x.id) === String(e.evidenceId));
+      if (linked) {
+        document.getElementById('modal-body').innerHTML += `
+          <div style="margin-top:24px; padding:16px; border:1px solid #4f8ef733; border-radius:8px; background:#4f8ef708;">
+            <div style="font-size:0.6rem; text-transform:uppercase; letter-spacing:0.1em; color:#4f8ef7; margin-bottom:8px;">Linked Evidence</div>
+            <div style="font-weight:bold; color:#fff; margin-bottom:4px;">${linked.title}</div>
+            <a href="evidence.html" style="font-size:0.75rem; color:#4f8ef7; text-decoration:none; border-bottom:1px solid transparent;" onmouseover="this.style.borderBottomColor='#4f8ef7'" onmouseout="this.style.borderBottomColor='transparent'">View in Evidence Locker →</a>
+          </div>
+        `;
+      }
+    }
+
     document.getElementById('modal-stats').innerHTML=`
       <div class="modal-stat"><div class="modal-stat-val" style="color:${color}">${e.vibe}/10</div><div class="modal-stat-lbl">Vibe</div></div>
       <div class="modal-stat"><div class="modal-stat-val">${STATUS_LABELS[e.status]||e.status}</div><div class="modal-stat-lbl">Status</div></div>

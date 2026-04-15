@@ -92,6 +92,7 @@
   <a href="archive.html">Archive</a>
   <a href="evidence.html">Evidence</a>
   <a href="unfinished.html" class="active">Unfinished</a>
+  <a href="timeline.html">Timeline</a>
   <div class="group-selector-wrap">
     <select id="group-select" onchange="switchGroup(this.value)"></select>
     <button class="btn-manage-groups" onclick="openGroupsModal()">⚙ Groups</button>
@@ -200,7 +201,8 @@
     <div class="modal-dates" id="modal-dates"></div>
     <div class="modal-eulogy" id="modal-eulogy"></div>
     <div class="modal-details" id="modal-details"></div>
-    <div class="modal-delete">
+    <div class="modal-delete" style="display:flex; justify-content:space-between; align-items:center;">
+      <button class="btn" id="revive-btn" onclick="revivePlan()" style="background:#39d353; color:#000; font-size:0.7rem;">Revive Plan</button>
       <button class="btn btn-ghost" style="font-size:0.7rem;" onclick="deletePlan()">Remove from Graveyard</button>
     </div>
   </div>
@@ -323,9 +325,47 @@
     document.getElementById('modal-title').textContent=p.plan;
     document.getElementById('modal-dates').textContent='Proposed '+formatDate(p.date)+'  ·  Cancelled '+p.cancels+' time'+(p.cancels!==1?'s':'');
     document.getElementById('modal-eulogy').textContent='"'+p.eulogy+'"';
-    document.getElementById('modal-details').innerHTML=`<div class="modal-detail-row"><span class="modal-detail-label">Suggested By</span><span class="modal-detail-val">${p.suggester}</span></div><div class="modal-detail-row"><span class="modal-detail-label">Killed By</span><span class="modal-detail-val">${p.killer}</span></div><div class="modal-detail-row"><span class="modal-detail-label">Cause of Death</span><span class="modal-detail-val">${COD_LABELS[p.cod]||p.cod}</span></div><div class="modal-detail-row"><span class="modal-detail-label">Current Status</span><span class="modal-detail-val">${STATUS_LABELS[p.status]||p.status}</span></div>`;
+    document.getElementById('modal-details').innerHTML=`<div class="modal-detail-row"><span class="modal-detail-label">Suggested By</span><span class="modal-detail-val">${p.suggester}</span></div><div class="modal-detail-row"><span class="modal-detail-label">Killed By</span><span class="modal-detail-val">${p.killer}</span></div><div class="modal-detail-row"><span class="modal-detail-label">Cause of Death</span><span class="modal-detail-val">${COD_LABELS[p.cod]||p.cod}</span></div><div class="modal-detail-row"><span class="modal-detail-label">Current Status</span><span class="modal-detail-val" style="color:${p.status==='zombie'?'#39d353':'inherit'}">${STATUS_LABELS[p.status]||p.status}</span></div>`;
+    
+    const reviveBtn = document.getElementById('revive-btn');
+    if (reviveBtn) {
+      reviveBtn.style.display = p.status === 'zombie' ? 'none' : 'block';
+    }
+
     document.getElementById('modal-overlay').classList.add('open');
     document.body.style.overflow='hidden';
+  }
+
+  function revivePlan() {
+    if (!currentId) return;
+    const p = plans.find(x => x.id === currentId);
+    if (!p) return;
+
+    p.status = 'zombie';
+    localStorage.setItem(getKey(), JSON.stringify(plans));
+
+    const gid = getCurrentGroupId();
+    const archiveKey = 'wreckage_archive_' + gid;
+    const archive = JSON.parse(localStorage.getItem(archiveKey) || '[]');
+    
+    const newEntry = {
+      id: Date.now(),
+      title: `Attempted revival of ${p.plan}`,
+      date: new Date().toISOString().split('T')[0],
+      people: p.suggester + ', ' + (getLoggedInUsername() || 'Someone'),
+      story: `The plan "${p.plan}" was officially resurrected from the graveyard. It is now a zombie.`,
+      mood: 'unhinged',
+      vibe: '8',
+      status: 'still-talked-about',
+      conversations: [{ name: 'System', text: 'Plan resurrected!', ts: Date.now() }]
+    };
+    
+    archive.unshift(newEntry);
+    localStorage.setItem(archiveKey, JSON.stringify(archive));
+
+    alert('Plan resurrected! Check the Archive for the revival log.');
+    closeModalDirect();
+    renderPlans();
   }
 
   function closeModal(e){if(e.target===document.getElementById('modal-overlay'))closeModalDirect();}
