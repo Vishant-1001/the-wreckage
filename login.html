@@ -114,7 +114,7 @@
       padding: 0;
       font-family: 'Courier New', Courier, monospace;
     }
-    .pass-toggle:hover { color: #fff; }
+    .pass-toggle:hover { color: var(--text); }
     .input-wrap input[type=password],
     .input-wrap input[type=text].pass-field {
       padding-right: 60px;
@@ -123,7 +123,7 @@
     /* PASSWORD STRENGTH */
     .strength-bar {
       height: 2px;
-      background: #1a1a1a;
+      background: var(--border);
       border-radius: 2px;
       margin-top: 8px;
       overflow: hidden;
@@ -139,15 +139,15 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       margin-top: 4px;
-      color: #64748b; /* Changed from #333 */
+      color: var(--text-dim);
     }
 
     /* SUBMIT BTN */
     .auth-btn {
       width: 100%;
       padding: 12px;
-      background: #fff;
-      color: #000;
+      background: var(--accent);
+      color: var(--bg);
       border: none;
       border-radius: 6px;
       font-family: 'Courier New', Courier, monospace;
@@ -156,9 +156,9 @@
       text-transform: uppercase;
       cursor: pointer;
       margin-top: 8px;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
-    .auth-btn:hover { background: #ddd; }
+    .auth-btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
     /* MESSAGES */
     .auth-error {
@@ -192,14 +192,14 @@
       margin-top: 20px;
       font-size: 0.72rem;
       letter-spacing: 0.08em;
-      color: #64748b; /* Changed from #333 */
+      color: var(--text-dim);
     }
     .auth-footer span {
-      color: #fff;
+      color: var(--text);
       cursor: pointer;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid var(--border);
     }
-    .auth-footer span:hover { border-color: #fff; }
+    .auth-footer span:hover { border-color: var(--text); }
 
     /* REQUIREMENTS LIST */
     .req-list {
@@ -238,6 +238,8 @@
 </head>
 <body>
 
+<button id="theme-toggle-btn" class="theme-toggle" style="position:fixed; top:24px; right:24px; z-index:1000;" onclick="toggleTheme()">☀️ Light</button>
+
 <div class="auth-wrap">
 
   <div class="auth-logo">
@@ -246,7 +248,6 @@
   </div>
 
   <div class="auth-box">
-    <button id="theme-toggle-btn" class="theme-toggle" style="position:absolute; top:16px; right:16px;" onclick="toggleTheme()">☀️ Light</button>
     <div class="auth-tabs">
       <button class="auth-tab active" id="tab-login"  onclick="switchTab('login')">Login</button>
       <button class="auth-tab"        id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
