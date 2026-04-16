@@ -38,3 +38,20 @@ function getLoggedInUsername() {
   const s = getSession();
   return s ? s.username : '';
 }
+
+function updateProfile(bio) {
+  const s = getSession();
+  if (!s) return;
+  const users = getUsers();
+  const userKey = s.username.toLowerCase();
+  if (users[userKey]) {
+    users[userKey].bio = bio;
+    saveUsers(users);
+    // Update session as well if needed, but bio is usually in the users object
+  }
+}
+
+function getUserProfile(username) {
+  const users = getUsers();
+  return users[username.toLowerCase()] || null;
+}

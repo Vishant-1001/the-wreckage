@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Profile — The Wreckage</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="theme.js"></script>
+  <style>
+    .profile-header { display: flex; align-items: center; gap: 24px; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+    .profile-avatar { width: 80px; height: 80px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--text); }
+    .profile-info h1 { margin-bottom: 4px; }
+    .profile-info p { color: var(--text-muted); font-size: 0.85rem; letter-spacing: 0.05em; }
+
+    .profile-grid { display: grid; grid-template-columns: 1fr 300px; gap: 32px; }
+    .profile-stats-card { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
+    .profile-stat-item { margin-bottom: 20px; }
+    .profile-stat-item:last-child { margin-bottom: 0; }
+    .profile-stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 4px; }
+    .profile-stat-value { font-size: 1.5rem; font-weight: bold; color: var(--text); }
+
+    .bio-section { margin-top: 32px; }
+    .bio-display { font-size: 0.95rem; color: var(--text-muted); line-height: 1.7; white-space: pre-wrap; margin-bottom: 16px; }
+    .bio-edit { display: none; }
+    .bio-edit.active { display: block; }
+    textarea { width: 100%; height: 120px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 6px; color: var(--text); padding: 12px; font-family: inherit; font-size: 0.9rem; resize: none; margin-bottom: 12px; }
+    textarea:focus { border-color: var(--text-dim); outline: none; }
+
+    .profile-groups-list { margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .profile-group-card { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 12px; transition: all 0.2s; }
+    .profile-group-card:hover { border-color: var(--text-dim); transform: translateY(-2px); }
+    .profile-group-icon { width: 32px; height: 32px; background: var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--text-muted); }
+    .profile-group-name { font-size: 0.85rem; color: var(--text); font-weight: 500; }
+    .profile-group-active { font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+
+    @media (max-width: 850px) {
+      .profile-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .profile-header { flex-direction: column; text-align: center; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">The Wreckage</a>
+  <a href="archive.html">Archive</a>
+  <a href="evidence.html">Evidence</a>
+  <a href="unfinished.html">Unfinished</a>
+  <a href="timeline.html">Timeline</a>
+  <a href="profile.html" class="active">Profile</a>
+  <div class="group-selector-wrap">
+    <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()">☀️ Light</button>
+    <select id="group-select" onchange="switchGroup(this.value)"></select>
+    <button class="btn-manage-groups" onclick="openGroupsModal()">⚙ Groups</button>
+    <span id="nav-user" style="font-size:0.72rem;letter-spacing:0.1em;color:#94a3b8;white-space:nowrap;"></span>
+    <button class="btn-manage-groups" onclick="logout()">↩ Logout</button>
+  </div>
+</nav>
+
+<main>
+  <div class="profile-header">
+    <div class="profile-avatar" id="profile-avatar">👤</div>
+    <div class="profile-info">
+      <h1 id="profile-username">Username</h1>
+      <p id="profile-email">email@example.com</p>
+    </div>
+  </div>
+
+  <div class="profile-grid">
+    <div class="profile-main">
+      <div class="panel">
+        <div class="panel-title">About Me</div>
+        <div class="bio-section">
+          <div id="bio-display" class="bio-display">No bio yet. Tell the crew something about yourself.</div>
+          <div id="bio-edit" class="bio-edit">
+            <textarea id="bio-textarea" placeholder="Write your bio here..."></textarea>
+            <div style="display:flex; gap:12px;">
+              <button class="btn" onclick="saveBio()">Save Bio</button>
+              <button class="btn btn-ghost" onclick="toggleBioEdit()">Cancel</button>
+            </div>
+          </div>
+          <button id="edit-bio-btn" class="btn btn-ghost" style="font-size:0.7rem;" onclick="toggleBioEdit()">Edit Bio</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top: 32px;">
+        <div class="panel-title">My Groups</div>
+        <div id="profile-groups-list" class="profile-groups-list">
+          <!-- Groups will be populated here -->
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-sidebar">
+      <div class="profile-stats-card">
+        <div class="panel-title" style="margin-bottom:20px; color:var(--text-muted);">Global Stats</div>
+        <div class="profile-stat-item">
+          <div class="profile-stat-label">Total Moments</div>
+          <div class="profile-stat-value" id="stat-archive">0</div>
+        </div>
+        <div class="profile-stat-item">
+          <div class="profile-stat-label">Evidence Files</div>
+          <div class="profile-stat-value" id="stat-evidence">0</div>
+        </div>
+        <div class="profile-stat-item">
+          <div class="profile-stat-label">Unfinished Plans</div>
+          <div class="profile-stat-value" id="stat-plans">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- GROUPS MODAL -->
+<div class="groups-modal-overlay" id="groups-modal-overlay" onclick="closeGroupsModal(event)">
+  <div class="groups-modal">
+    <h3>⚙ Manage Groups</h3>
+    <div class="group-list" id="group-list"></div>
+    <div class="group-add-row">
+      <input type="text" id="new-group-input" placeholder="New group name" onkeydown="if(event.key==='Enter')addGroup()"/>
+      <button class="btn" onclick="addGroup()">Create</button>
+    </div>
+    <div style="margin-top:16px;text-align:right;">
+      <button class="btn btn-ghost" onclick="closeGroupsModalDirect()" style="font-size:0.75rem;">Close</button>
+    </div>
+  </div>
+</div>
+
+<footer><p>The Wreckage &nbsp;·&nbsp; User Profile</p></footer>
+
+<script src="auth.js"></script>
+<script src="groups.js"></script>
+<script>
+  requireLogin();
+  const __s = getSession();
+  if (__s) {
+    document.getElementById('nav-user').textContent = '👤 ' + __s.username;
+    document.getElementById('profile-username').textContent = __s.username;
+    document.getElementById('profile-email').textContent = __s.email;
+    document.getElementById('profile-avatar').textContent = __s.username.charAt(0).toUpperCase();
+  }
+
+  function loadProfile() {
+    const profile = getUserProfile(__s.username);
+    if (profile && profile.bio) {
+      document.getElementById('bio-display').textContent = profile.bio;
+      document.getElementById('bio-textarea').value = profile.bio;
+    }
+    calculateStats();
+    renderMyGroups();
+  }
+
+  function renderMyGroups() {
+    const groups = getGroups();
+    const currentId = getCurrentGroupId();
+    const list = document.getElementById('profile-groups-list');
+    if (!list) return;
+
+    list.innerHTML = '';
+    groups.forEach(g => {
+      const card = document.createElement('div');
+      card.className = 'profile-group-card';
+      card.innerHTML = `
+        <div class="profile-group-icon">👥</div>
+        <div>
+          <div class="profile-group-name">${g.name}</div>
+          ${g.id === currentId ? '<div class="profile-group-active">Active</div>' : ''}
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  function calculateStats() {
+    const groups = getGroups();
+    let totalArchive = 0;
+    let totalEvidence = 0;
+    let totalPlans = 0;
+
+    groups.forEach(g => {
+      const archive = JSON.parse(localStorage.getItem('wreckage_archive_' + g.id) || '[]');
+      const evidence = JSON.parse(localStorage.getItem('wreckage_evidence_' + g.id) || '[]');
+      const plans = JSON.parse(localStorage.getItem('wreckage_unfinished_' + g.id) || '[]');
+      
+      totalArchive += archive.length;
+      totalEvidence += evidence.length;
+      totalPlans += plans.length;
+    });
+
+    document.getElementById('stat-archive').textContent = totalArchive;
+    document.getElementById('stat-evidence').textContent = totalEvidence;
+    document.getElementById('stat-plans').textContent = totalPlans;
+  }
+
+  function toggleBioEdit() {
+    const display = document.getElementById('bio-display');
+    const edit = document.getElementById('bio-edit');
+    const btn = document.getElementById('edit-bio-btn');
+    const isActive = edit.classList.toggle('active');
+    
+    display.style.display = isActive ? 'none' : 'block';
+    btn.style.display = isActive ? 'none' : 'block';
+  }
+
+  function saveBio() {
+    const bio = document.getElementById('bio-textarea').value.trim();
+    updateProfile(bio);
+    document.getElementById('bio-display').textContent = bio || 'No bio yet. Tell the crew something about yourself.';
+    toggleBioEdit();
+  }
+
+  window.addEventListener('groupChanged', () => {
+    // Stats might change if groups are added/removed, but usually they are global
+    calculateStats();
+    renderMyGroups();
+  });
+
+  initGroups();
+  loadProfile();
+</script>
+</body>
+</html>

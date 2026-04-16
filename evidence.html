@@ -5,46 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Evidence Locker — The Wreckage</title>
   <link rel="stylesheet" href="style.css"/>
+  <script src="theme.js"></script>
   <style>
-    body { background:#060a0f; }
-    nav { background:rgba(6,10,15,0.97);border-bottom:1px solid #0d1a2a; }
-    nav a { color:#60a5fa; } /* Changed from #1a3a5c */
-    nav a:hover { color:#4f8ef7;background:rgba(79,142,247,0.08); }
-    nav a.active { color:#4f8ef7;border-color:#4f8ef7;background:rgba(79,142,247,0.08); }
-    .group-selector-wrap select { background:#060a0f;border-color:#0d1a2a;color:#60a5fa; } /* Changed from #1a3a5c */
-    .btn-manage-groups { border-color:#0d1a2a;color:#60a5fa; } /* Changed from #1a3a5c */
-    .btn-manage-groups:hover { border-color:#1a3a5c;color:#4f8ef7; }
-
-    .page-hero { padding:48px 0 32px;border-bottom:1px solid #0d1a2a;margin-bottom:36px; }
-    .page-hero-label { font-size:0.65rem;letter-spacing:0.35em;text-transform:uppercase;color:#60a5fa;margin-bottom:10px; } /* Changed from #1a3a5c */
-    .page-hero h1 { color:#4f8ef7;margin-bottom:8px; }
-    .page-hero p  { color:#93c5fd;font-size:0.82rem; } /* Changed from #1a3a5c */
-
-    .panel { background:#080d14;border-color:#0d1a2a; }
-    .panel-title { color:#60a5fa;border-bottom-color:#0d1a2a; } /* Changed from #1a3a5c */
-    input[type=text],input[type=date],textarea,select { background:#060a0f;border-color:#0d1a2a;color:#c0d0e0; }
-    input[type=text]:focus,input[type=date]:focus,textarea:focus,select:focus { border-color:#4f8ef7; }
-    label { color:#60a5fa; } /* Changed from #1a3a5c */
+    .page-hero { padding:48px 0 32px;border-bottom:1px solid var(--border);margin-bottom:36px; }
+    .page-hero-label { font-size:0.65rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px; }
+    .page-hero h1 { color:var(--text);margin-bottom:8px; }
+    .page-hero p  { color:var(--text-muted);font-size:0.82rem; }
 
     /* SIMPLE FILE INPUT */
     input[type=file] {
       width: 100%;
       padding: 10px 12px;
-      background: #060a0f;
-      border: 1px solid #0d1a2a;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
       border-radius: 6px;
-      color: #4f8ef7;
+      color: var(--text);
       font-family: 'Courier New', Courier, monospace;
       font-size: 0.82rem;
       cursor: pointer;
       margin-bottom: 6px;
     }
-    input[type=file]:focus { outline: none; border-color: #4f8ef7; }
+    input[type=file]:focus { outline: none; border-color: var(--text-dim); }
     input[type=file]::file-selector-button {
-      background: #0d1a2a;
-      border: 1px solid #1a3a5c;
+      background: var(--border);
+      border: 1px solid var(--border-muted);
       border-radius: 4px;
-      color: #4f8ef7;
+      color: var(--text-muted);
       font-family: 'Courier New', Courier, monospace;
       font-size: 0.72rem;
       letter-spacing: 0.1em;
@@ -54,51 +40,36 @@
       margin-right: 12px;
       transition: background 0.2s;
     }
-    input[type=file]::file-selector-button:hover { background: #1a3a5c; }
-    .file-hint { font-size:0.68rem;color:#94a3b8;letter-spacing:0.06em; } /* Changed from #0d2a4a */
+    input[type=file]::file-selector-button:hover { background: var(--border-muted); }
+    .file-hint { font-size:0.68rem;color:var(--text-dim);letter-spacing:0.06em; }
 
     /* FILE CARDS */
     .files-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px; }
-    .file-card { background:#080d14;border:1px solid #0d1a2a;border-radius:8px;padding:20px;cursor:pointer;transition:all 0.25s;position:relative; }
-    .file-card::before { content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:#4f8ef7;border-radius:4px 0 0 4px; }
-    .file-card:hover { border-color:#1a3a5c;transform:translateY(-2px); }
+    .file-card { background:var(--panel-bg);border:1px solid var(--border);border-radius:8px;padding:20px;cursor:pointer;transition:all 0.25s;position:relative; }
+    .file-card::before { content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--accent);border-radius:4px 0 0 4px; }
+    .file-card:hover { border-color:var(--text-dim);transform:translateY(-2px); }
     .file-type-icon { font-size:1.8rem;margin-bottom:10px;display:block; }
-    .file-type-badge { display:inline-block;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-bottom:12px;background:rgba(79,142,247,0.1);color:#4f8ef7;border:1px solid rgba(79,142,247,0.2); }
-    .file-title { font-size:0.95rem;color:#c0d0e0;font-weight:bold;margin-bottom:6px; }
-    .file-meta  { font-size:0.72rem;color:#94a3b8;letter-spacing:0.06em;margin-bottom:8px; } /* Changed from #1a3a5c */
-    .file-desc  { font-size:0.8rem;color:#cbd5e0;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; } /* Changed from #1a3a5c */
-    .file-footer { display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #0d1a2a;font-size:0.68rem;color:#94a3b8; } /* Changed from #1a3a5c */
+    .file-type-badge { display:inline-block;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-bottom:12px;background:var(--input-bg);color:var(--text-muted);border:1px solid var(--border); }
+    .file-title { font-size:0.95rem;color:var(--text);font-weight:bold;margin-bottom:6px; }
+    .file-meta  { font-size:0.72rem;color:var(--text-dim);letter-spacing:0.06em;margin-bottom:8px; }
+    .file-desc  { font-size:0.8rem;color:var(--text-muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+    .file-footer { display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--border-muted);font-size:0.68rem;color:var(--text-dim); }
 
     /* MODAL */
     .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity 0.2s; }
     .modal-overlay.open { opacity:1;pointer-events:all; }
-    .modal { background:#080d14;border:1px solid #1a3a5c;border-radius:10px;max-width:520px;width:100%;padding:32px;position:relative;transform:translateY(20px);transition:transform 0.2s;max-height:85vh;overflow-y:auto; }
+    .modal { background:var(--panel-bg);border:1px solid var(--border);border-radius:10px;max-width:520px;width:100%;padding:32px;position:relative;transform:translateY(20px);transition:transform 0.2s;max-height:85vh;overflow-y:auto; }
     .modal-overlay.open .modal { transform:translateY(0); }
-    .modal-close { position:absolute;top:16px;right:16px;background:none;border:none;color:#60a5fa;font-size:1.2rem;cursor:pointer;padding:4px 8px; } /* Changed from #1a3a5c */
-    .modal-close:hover { color:#4f8ef7; }
+    .modal-close { position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer;padding:4px 8px; }
+    .modal-close:hover { color:var(--text); }
     .modal-file-icon { font-size:2.5rem;margin-bottom:12px; }
-    .modal-file-type { font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:#60a5fa;margin-bottom:8px; } /* Changed from #1a3a5c */
-    .modal-title { font-size:1.3rem;color:#c0d0e0;margin-bottom:6px; }
-    .modal-meta  { font-size:0.72rem;color:#94a3b8;margin-bottom:16px; } /* Changed from #1a3a5c */
-    .modal-filename { background:#060a0f;border:1px solid #0d1a2a;border-radius:6px;padding:12px 14px;font-size:0.82rem;color:#4f8ef7;letter-spacing:0.05em;margin-bottom:16px;word-break:break-all; }
-    .modal-desc  { font-size:0.88rem;color:#cbd5e0;line-height:1.9;margin-bottom:20px; } /* Changed from #4a6a8a */
-    .modal-note  { font-size:0.75rem;color:#94a3b8;font-style:italic;padding:10px 14px;border:1px solid #0d1a2a;border-radius:6px;line-height:1.6; } /* Changed from #1a3a5c */
-    .modal-delete { margin-top:20px;padding-top:16px;border-top:1px solid #0d1a2a;text-align:right; }
-
-    .filter-btn { border-color:#0d1a2a;color:#60a5fa; } /* Changed from #1a3a5c */
-    .filter-btn:hover { border-color:#1a3a5c;color:#4f8ef7; }
-    .filter-btn.active { border-color:#4f8ef7;color:#4f8ef7;background:rgba(79,142,247,0.08); }
-
-    .empty-state { color:#64748b; } /* Changed from #1a3a5c */
-    footer { border-top-color:#0d1a2a;color:#64748b; } /* Changed from #1a3a5c */
-    .btn { background:#4f8ef7;color:#000; }
-    .btn:hover { background:#3a7ae0; }
-    .btn-ghost { background:transparent;color:#60a5fa;border-color:#0d1a2a; } /* Changed from #1a3a5c */
-    .btn-ghost:hover { border-color:#4f8ef7;color:#4f8ef7; }
-    .groups-modal { border-color:#1a3a5c; }
-    .groups-modal h3 { color:#4f8ef7; }
-    .group-item { background:#060a0f;border-color:#0d1a2a; }
-    .group-item-name { color:#4f8ef7; }
+    .modal-file-type { font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px; }
+    .modal-title { font-size:1.3rem;color:var(--text);margin-bottom:6px; }
+    .modal-meta  { font-size:0.72rem;color:var(--text-dim);margin-bottom:16px; }
+    .modal-filename { background:var(--input-bg);border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-size:0.82rem;color:var(--text-muted);letter-spacing:0.05em;margin-bottom:16px;word-break:break-all; }
+    .modal-desc  { font-size:0.88rem;color:var(--text);line-height:1.9;margin-bottom:20px; }
+    .modal-note  { font-size:0.75rem;color:var(--text-muted);font-style:italic;padding:10px 14px;border:1px solid var(--border);border-radius:6px;line-height:1.6; }
+    .modal-delete { margin-top:20px;padding-top:16px;border-top:1px solid var(--border-muted);text-align:right; }
 
     @media (max-width: 640px) {
       .page-hero { padding: 32px 0 24px; }
@@ -115,7 +86,9 @@
   <a href="evidence.html" class="active">Evidence</a>
   <a href="unfinished.html">Unfinished</a>
   <a href="timeline.html">Timeline</a>
+  <a href="profile.html">Profile</a>
   <div class="group-selector-wrap">
+    <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()">☀️ Light</button>
     <select id="group-select" onchange="switchGroup(this.value)"></select>
     <button class="btn-manage-groups" onclick="openGroupsModal()">⚙ Groups</button>
     <span id="nav-user" style="font-size:0.72rem;letter-spacing:0.1em;color:#60a5fa;white-space:nowrap;"></span> <!-- Changed from #1a3a5c -->

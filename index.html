@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>The Wreckage</title>
   <link rel="stylesheet" href="style.css"/>
+  <script src="theme.js"></script>
   <style>
     body { overflow-x: hidden; }
     #particles { position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none; }
@@ -14,41 +15,41 @@
       display:flex;flex-direction:column;align-items:center;justify-content:center;
       text-align:center;padding:40px 24px;
     }
-    .hero-label { font-size:0.68rem;letter-spacing:0.4em;text-transform:uppercase;color:#94a3b8;margin-bottom:24px;animation:fadeUp 1s ease both; } /* Changed from #444 */
-    .hero-title { font-size:clamp(3rem,10vw,7rem);font-weight:bold;letter-spacing:0.05em;text-transform:uppercase;color:#fff;line-height:1;margin-bottom:24px;animation:fadeUp 1s ease 0.2s both; }
+    .hero-label { font-size:0.68rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--text-dim);margin-bottom:24px;animation:fadeUp 1s ease both; }
+    .hero-title { font-size:clamp(3rem,10vw,7rem);font-weight:bold;letter-spacing:0.05em;text-transform:uppercase;color:var(--text);line-height:1;margin-bottom:24px;animation:fadeUp 1s ease 0.2s both; }
     .hero-title span { display:inline-block;position:relative; }
-    .hero-title span::after { content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:#fff;animation:lineGrow 1s ease 1.2s forwards; }
-    .hero-sub { font-size:0.85rem;letter-spacing:0.2em;color:#94a3b8;margin-bottom:60px;animation:fadeUp 1s ease 0.4s both; } /* Changed from #444 */
+    .hero-title span::after { content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--accent);animation:lineGrow 1s ease 1.2s forwards; }
+    .hero-sub { font-size:0.85rem;letter-spacing:0.2em;color:var(--text-muted);margin-bottom:60px;animation:fadeUp 1s ease 0.4s both; }
 
     .group-banner {
-      background:#111;border:1px solid #1e1e1e;border-radius:8px;
+      background:var(--input-bg);border:1px solid var(--border);border-radius:8px;
       padding:12px 20px;margin-bottom:32px;
-      font-size:0.75rem;letter-spacing:0.1em;color:#cbd5e0; /* Changed from #555 */
+      font-size:0.75rem;letter-spacing:0.1em;color:var(--text-muted);
       animation:fadeUp 1s ease 0.5s both;
     }
-    .group-banner strong { color:#fff; }
+    .group-banner strong { color:var(--text); }
 
     .hero-nav { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:700px;width:100%;animation:fadeUp 1s ease 0.6s both; }
-    .hero-card { background:#0f0f0f;border:1px solid #1e1e1e;border-radius:8px;padding:28px 20px;text-decoration:none;color:#fff;transition:all 0.3s;position:relative;overflow:hidden; }
-    .hero-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,#fff);transform:scaleX(0);transition:transform 0.3s; }
-    .hero-card:hover { border-color:#333;transform:translateY(-4px); }
+    .hero-card { background:var(--panel-bg);border:1px solid var(--border);border-radius:8px;padding:28px 20px;text-decoration:none;color:var(--text);transition:all 0.3s;position:relative;overflow:hidden; }
+    .hero-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transition:transform 0.3s; }
+    .hero-card:hover { border-color:var(--text-dim);transform:translateY(-4px); }
     .hero-card:hover::before { transform:scaleX(1); }
     .hero-card .card-icon { font-size:1.8rem;margin-bottom:12px;display:block; }
-    .hero-card .card-title { font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#fff;margin-bottom:6px; }
-    .hero-card .card-desc { font-size:0.75rem;color:#94a3b8;line-height:1.6; } /* Changed from #444 */
+    .hero-card .card-title { font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text);margin-bottom:6px; }
+    .hero-card .card-desc { font-size:0.75rem;color:var(--text-muted);line-height:1.6; }
 
-    .scroll-hint { position:absolute;bottom:32px;left:50%;transform:translateX(-50%);font-size:0.65rem;letter-spacing:0.3em;color:#64748b;text-transform:uppercase;animation:pulse 2s infinite; } /* Changed from #333 */
+    .scroll-hint { position:absolute;bottom:32px;left:50%;transform:translateX(-50%);font-size:0.65rem;letter-spacing:0.3em;color:var(--text-dim);text-transform:uppercase;animation:pulse 2s infinite; }
 
     .about { position:relative;z-index:1;max-width:600px;margin:0 auto;padding:80px 24px;text-align:center; }
-    .about-label { font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:#64748b;margin-bottom:20px; } /* Changed from #333 */
-    .about-text { font-size:0.95rem;line-height:2;color:#cbd5e0; } /* Changed from #555 */
-    .about-text strong { color:#e2e8f0;font-weight:normal; } /* Changed from #888 */
+    .about-label { font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--text-dim);margin-bottom:20px; }
+    .about-text { font-size:0.95rem;line-height:2;color:var(--text-muted); }
+    .about-text strong { color:var(--text);font-weight:normal; }
 
-    .stats { position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);max-width:600px;margin:0 auto 80px;border:1px solid #1a1a1a;border-radius:8px;overflow:hidden; }
-    .stat { padding:24px;text-align:center;border-right:1px solid #1a1a1a; }
+    .stats { position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);max-width:600px;margin:0 auto 80px;border:1px solid var(--border);border-radius:8px;overflow:hidden; }
+    .stat { padding:24px;text-align:center;border-right:1px solid var(--border); }
     .stat:last-child { border-right:none; }
-    .stat-val { font-size:1.8rem;font-weight:bold;color:#fff;display:block;margin-bottom:4px; }
-    .stat-label { font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:#64748b; } /* Changed from #333 */
+    .stat-val { font-size:1.8rem;font-weight:bold;color:var(--text);display:block;margin-bottom:4px; }
+    .stat-label { font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim); }
 
     @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
     @keyframes lineGrow { to{width:100%} }
@@ -57,7 +58,7 @@
     @media(max-width:768px){
       .hero-nav { grid-template-columns: 1fr; }
       .stats { grid-template-columns: 1fr; margin-bottom: 40px; }
-      .stat { border-right: none; border-bottom: 1px solid #1a1a1a; }
+      .stat { border-right: none; border-bottom: 1px solid var(--border); }
       .stat:last-child { border-bottom: none; }
       .hero-title { font-size: 4rem; }
     }
@@ -77,7 +78,9 @@
   <a href="evidence.html">Evidence</a>
   <a href="unfinished.html">Unfinished</a>
   <a href="timeline.html">Timeline</a>
+  <a href="profile.html">Profile</a>
   <div class="group-selector-wrap">
+    <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()">☀️ Light</button>
     <select id="group-select" onchange="switchGroup(this.value)"></select>
     <button class="btn-manage-groups" onclick="openGroupsModal()">⚙ Groups</button>
     <span id="nav-user" style="font-size:0.72rem;letter-spacing:0.1em;color:#94a3b8;white-space:nowrap;"></span> <!-- Changed from #444 -->

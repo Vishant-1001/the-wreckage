@@ -5,21 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Timeline of Chaos — The Wreckage</title>
   <link rel="stylesheet" href="style.css"/>
+  <script src="theme.js"></script>
   <style>
     .timeline-container { position:relative; padding: 20px 0; }
-    .timeline-container::before { content:''; position:absolute; left:20px; top:0; bottom:0; width:2px; background:#1e1e1e; }
+    .timeline-container::before { content:''; position:absolute; left:20px; top:0; bottom:0; width:2px; background:var(--border); }
     
     .timeline-item { position:relative; margin-bottom:40px; padding-left:60px; }
-    .timeline-dot { position:absolute; left:12px; top:0; width:18px; height:18px; border-radius:50%; background:#0a0a0a; border:3px solid var(--accent, #fff); z-index:2; }
+    .timeline-dot { position:absolute; left:12px; top:0; width:18px; height:18px; border-radius:50%; background:var(--bg); border:3px solid var(--accent); z-index:2; }
     
-    .timeline-date { font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; color:#94a3b8; margin-bottom:8px; display:block; }
-    .timeline-content { background:#0f0f0f; border:1px solid #1e1e1e; border-radius:8px; padding:20px; position:relative; }
-    .timeline-content::before { content:''; position:absolute; left:-8px; top:10px; width:16px; height:16px; background:#0f0f0f; border-left:1px solid #1e1e1e; border-bottom:1px solid #1e1e1e; transform:rotate(45deg); }
+    .timeline-date { font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-dim); margin-bottom:8px; display:block; }
+    .timeline-content { background:var(--panel-bg); border:1px solid var(--border); border-radius:8px; padding:20px; position:relative; }
+    .timeline-content::before { content:''; position:absolute; left:-8px; top:10px; width:16px; height:16px; background:var(--panel-bg); border-left:1px solid var(--border); border-bottom:1px solid var(--border); transform:rotate(45deg); }
     
     .timeline-type { font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; padding:2px 8px; border-radius:20px; margin-bottom:12px; display:inline-block; border:1px solid; }
-    .timeline-title { font-size:1.1rem; font-weight:bold; color:#fff; margin-bottom:8px; }
-    .timeline-desc { font-size:0.85rem; color:#cbd5e0; line-height:1.6; }
-    .timeline-footer { margin-top:12px; padding-top:10px; border-top:1px solid #1a1a1a; font-size:0.7rem; color:#94a3b8; display:flex; justify-content:space-between; }
+    .timeline-title { font-size:1.1rem; font-weight:bold; color:var(--text); margin-bottom:8px; }
+    .timeline-desc { font-size:0.85rem; color:var(--text-muted); line-height:1.6; }
+    .timeline-footer { margin-top:12px; padding-top:10px; border-top:1px solid var(--border-muted); font-size:0.7rem; color:var(--text-dim); display:flex; justify-content:space-between; }
 
     @media (max-width: 640px) {
       .timeline-container::before { left: 15px; }
@@ -36,7 +37,9 @@
   <a href="evidence.html">Evidence</a>
   <a href="unfinished.html">Unfinished</a>
   <a href="timeline.html" class="active">Timeline</a>
+  <a href="profile.html">Profile</a>
   <div class="group-selector-wrap">
+    <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()">☀️ Light</button>
     <select id="group-select" onchange="switchGroup(this.value)"></select>
     <button class="btn-manage-groups" onclick="openGroupsModal()">⚙ Groups</button>
     <span id="nav-user" style="font-size:0.72rem;letter-spacing:0.1em;color:#94a3b8;white-space:nowrap;"></span>
@@ -51,7 +54,7 @@
     <p>The complete history of your group. Every moment, every failure, every proof.</p>
   </div>
 
-  <h2 id="group-label-title" style="color:#cbd5e0; margin-bottom:32px;">History — <span id="group-label" style="color:#555; font-size:0.85rem;"></span></h2>
+  <h2 id="group-label-title" style="color:var(--text-muted); margin-bottom:32px;">History — <span id="group-label" style="color:var(--text-dim); font-size:0.85rem;"></span></h2>
 
   <div class="timeline-container" id="timeline-container"></div>
   

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>The Archive — The Wreckage</title>
   <link rel="stylesheet" href="style.css"/>
+  <script src="theme.js"></script>
   <style>
     :root {
       --legendary:    #f0b429;
@@ -14,10 +15,10 @@
       --bittersweet:  #9c6fc7;
       --unexplainable:#888888;
     }
-    .page-hero { padding:48px 0 32px;border-bottom:1px solid #1a1a1a;margin-bottom:36px; }
-    .page-hero-label { font-size:0.65rem;letter-spacing:0.35em;text-transform:uppercase;color:#64748b;margin-bottom:10px; } /* Changed from #333 */
-    .page-hero h1 { color:#fff;margin-bottom:8px; }
-    .page-hero p  { color:#94a3b8;font-size:0.82rem; } /* Changed from #444 */
+    .page-hero { padding:48px 0 32px;border-bottom:1px solid var(--border);margin-bottom:36px; }
+    .page-hero-label { font-size:0.65rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px; }
+    .page-hero h1 { color:var(--text);margin-bottom:8px; }
+    .page-hero p  { color:var(--text-muted);font-size:0.82rem; }
 
     .archive-form { display:none; }
     .archive-form.open { display:block;animation:slideDown 0.3s ease; }
@@ -25,7 +26,7 @@
 
     .mood-grid { display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:4px; }
     .mood-option { display:none; }
-    .mood-option + label { display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:1px solid #222;border-radius:6px;cursor:pointer;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;transition:all 0.2s;text-align:center; } /* Changed from #555 */
+    .mood-option + label { display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);transition:all 0.2s;text-align:center; }
     .mood-option + label .mood-dot { width:10px;height:10px;border-radius:50%; }
     .mood-option[value="legendary"]     + label .mood-dot { background:var(--legendary); }
     .mood-option[value="cursed"]        + label .mood-dot { background:var(--cursed); }
@@ -33,45 +34,45 @@
     .mood-option[value="unhinged"]      + label .mood-dot { background:var(--unhinged); }
     .mood-option[value="bittersweet"]   + label .mood-dot { background:var(--bittersweet); }
     .mood-option[value="unexplainable"] + label .mood-dot { background:var(--unexplainable); }
-    .mood-option:checked + label { border-color:#555;color:#fff;background:#111; }
+    .mood-option:checked + label { border-color:var(--text-dim);color:var(--text);background:var(--input-bg); }
 
     .vibe-slider-wrap { display:flex;align-items:center;gap:12px; }
-    input[type=range] { flex:1;-webkit-appearance:none;height:2px;background:#222;border-radius:2px;outline:none;border:none;padding:0;margin:0; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;cursor:pointer; }
-    .vibe-val { font-size:1.1rem;font-weight:bold;color:#fff;min-width:24px;text-align:center; }
+    input[type=range] { flex:1;-webkit-appearance:none;height:2px;background:var(--border);border-radius:2px;outline:none;border:none;padding:0;margin:0; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer; }
+    .vibe-val { font-size:1.1rem;font-weight:bold;color:var(--text);min-width:24px;text-align:center; }
 
     .cards-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px; }
 
-    .archive-card { border-radius:8px;border:1px solid #1e1e1e;padding:22px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;background:#0f0f0f; }
-    .archive-card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--mood-color,#444); }
-    .archive-card:hover { transform:translateY(-3px);border-color:#2a2a2a; }
+    .archive-card { border-radius:8px;border:1px solid var(--border);padding:22px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;background:var(--panel-bg); }
+    .archive-card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--mood-color,var(--border)); }
+    .archive-card:hover { transform:translateY(-3px);border-color:var(--text-dim); }
 
     .card-mood-badge { display:inline-block;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;padding:3px 8px;border-radius:20px;margin-bottom:12px;border:1px solid; }
-    .card-title-text { font-size:1rem;font-weight:bold;color:#fff;margin-bottom:6px; }
-    .card-meta { font-size:0.72rem;color:#94a3b8;letter-spacing:0.08em;margin-bottom:10px; } /* Changed from #444 */
-    .card-preview { font-size:0.8rem;color:#cbd5e0;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden; } /* Changed from #555 */
-    .card-footer { display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #1a1a1a;font-size:0.68rem;color:#94a3b8;letter-spacing:0.08em; } /* Changed from #444 */
-    .card-vibe { color:#fff;font-weight:bold; }
-    .card-status-badge { font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px;border-radius:20px;border:1px solid #222;color:#cbd5e0; } /* Changed from #555 */
-    .card-conv-count { font-size:0.65rem;color:#cbd5e0; } /* Changed from #555 */
+    .card-title-text { font-size:1rem;font-weight:bold;color:var(--text);margin-bottom:6px; }
+    .card-meta { font-size:0.72rem;color:var(--text-muted);letter-spacing:0.08em;margin-bottom:10px; }
+    .card-preview { font-size:0.8rem;color:var(--text-muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden; }
+    .card-footer { display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-muted);font-size:0.68rem;color:var(--text-muted);letter-spacing:0.08em; }
+    .card-vibe { color:var(--text);font-weight:bold; }
+    .card-status-badge { font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px;border-radius:20px;border:1px solid var(--border);color:var(--text-muted); }
+    .card-conv-count { font-size:0.65rem;color:var(--text-muted); }
 
     /* MODAL */
     .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity 0.2s; }
     .modal-overlay.open { opacity:1;pointer-events:all; }
-    .modal { background:#0f0f0f;border:1px solid #222;border-radius:10px;max-width:580px;width:100%;padding:32px;position:relative;transform:translateY(20px);transition:transform 0.2s;max-height:88vh;overflow-y:auto; }
+    .modal { background:var(--panel-bg);border:1px solid var(--border);border-radius:10px;max-width:580px;width:100%;padding:32px;position:relative;transform:translateY(20px);transition:transform 0.2s;max-height:88vh;overflow-y:auto; }
     .modal-overlay.open .modal { transform:translateY(0); }
-    .modal-close { position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:1.2rem;cursor:pointer;padding:4px 8px; } /* Changed from #444 */
-    .modal-close:hover { color:#fff; }
+    .modal-close { position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;padding:4px 8px; }
+    .modal-close:hover { color:var(--text); }
     .modal-mood-bar { height:3px;border-radius:2px;margin-bottom:24px; }
-    .modal-title { font-size:1.4rem;color:#fff;margin-bottom:8px;letter-spacing:0.05em; }
-    .modal-meta  { font-size:0.72rem;color:#94a3b8;letter-spacing:0.1em;margin-bottom:20px; } /* Changed from #444 */
-    .modal-body  { font-size:0.88rem;color:#cbd5e0;line-height:1.9;margin-bottom:24px; } /* Changed from #777 */
-    .modal-stats { display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding-top:20px;border-top:1px solid #1a1a1a; }
+    .modal-title { font-size:1.4rem;color:var(--text);margin-bottom:8px;letter-spacing:0.05em; }
+    .modal-meta  { font-size:0.72rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:20px; }
+    .modal-body  { font-size:0.88rem;color:var(--text);line-height:1.9;margin-bottom:24px; }
+    .modal-stats { display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding-top:20px;border-top:1px solid var(--border-muted); }
     .modal-stat  { text-align:center; }
 
-    .modal-stat-val { font-size:1rem;color:#fff;font-weight:bold; }
-    .modal-stat-lbl { font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:#94a3b8;margin-top:3px; }
-    .modal-delete { margin-top:20px;padding-top:16px;border-top:1px solid #1a1a1a;text-align:right; }
+    .modal-stat-val { font-size:1rem;color:var(--text);font-weight:bold; }
+    .modal-stat-lbl { font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-top:3px; }
+    .modal-delete { margin-top:20px;padding-top:16px;border-top:1px solid var(--border-muted);text-align:right; }
 
     @media (max-width: 640px) {
       .mood-grid { grid-template-columns: repeat(3, 1fr); }
@@ -92,7 +93,9 @@
   <a href="evidence.html">Evidence</a>
   <a href="unfinished.html">Unfinished</a>
   <a href="timeline.html">Timeline</a>
+  <a href="profile.html">Profile</a>
   <div class="group-selector-wrap">
+    <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()">☀️ Light</button>
     <select id="group-select" onchange="switchGroup(this.value)"></select>
     <button class="btn-manage-groups" onclick="openGroupsModal()">⚙ Groups</button>
     <span id="nav-user" style="font-size:0.72rem;letter-spacing:0.1em;color:#94a3b8;white-space:nowrap;"></span> <!-- Changed from #444 -->
