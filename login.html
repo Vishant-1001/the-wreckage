@@ -87,6 +87,16 @@
       width: 100%;
       padding: 10px 14px 10px 38px;
       margin: 0;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text);
+      border-radius: 4px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-wrap input:focus {
+      border-color: var(--text-dim);
     }
     .input-icon {
       position: absolute;
@@ -95,7 +105,7 @@
       transform: translateY(-50%);
       font-size: 0.85rem;
       pointer-events: none;
-      opacity: 0.4;
+      opacity: 0.6;
     }
 
     /* PASSWORD TOGGLE */
@@ -106,7 +116,7 @@
       transform: translateY(-50%);
       background: none;
       border: none;
-      color: #94a3b8; /* Changed from #444 */
+      color: var(--text-muted);
       cursor: pointer;
       font-size: 0.75rem;
       letter-spacing: 0.08em;
@@ -212,7 +222,7 @@
     .req-list li {
       font-size: 0.68rem;
       letter-spacing: 0.08em;
-      color: #64748b; /* Changed from #333 */
+      color: var(--text-muted);
       display: flex;
       align-items: center;
       gap: 6px;
@@ -222,7 +232,7 @@
     .req-dot {
       width: 6px; height: 6px;
       border-radius: 50%;
-      background: #334155; /* Changed from #222 */
+      background: var(--border);
       flex-shrink: 0;
       transition: background 0.2s;
     }
@@ -301,7 +311,7 @@
         <label>Email</label>
         <div class="input-wrap">
           <span class="input-icon">✉️</span>
-          <input type="text" id="signup-email" placeholder="your@email.com" autocomplete="email" oninput="validateSignupLive()"/>
+          <input type="email" id="signup-email" placeholder="your@email.com" autocomplete="email" oninput="validateSignupLive()"/>
         </div>
         <div class="error-msg" id="err-signup-email">Enter a valid email address.</div>
       </div>

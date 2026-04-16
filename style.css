@@ -112,6 +112,8 @@ label {
   margin-bottom: 6px;
 }
 input[type=text],
+input[type=password],
+input[type=email],
 input[type=date],
 input[type=number],
 textarea,
@@ -127,7 +129,7 @@ select {
   transition: border-color 0.2s, background 0.3s, color 0.3s;
   outline: none;
 }
-input:focus, textarea:focus, select:focus { border-color: #444; }
+input:focus, textarea:focus, select:focus { border-color: var(--text-dim); }
 textarea { resize: vertical; min-height: 90px; }
 select option { background: var(--input-bg); }
 
